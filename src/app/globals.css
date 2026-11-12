@@ -1,26 +1,40 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens. The site is dark-only for now (console look).
+ * Channel colors (ch-1..ch-4) are reused by every simulation for "kinds of
+ * traffic" so the visual language stays consistent across technologies.
+ */
+@theme {
+  --color-bg: #0b0d10;
+  --color-panel: #12151a;
+  --color-panel-2: #181c22;
+  --color-line: #262c35;
+  --color-fg: #e6e9ee;
+  --color-fg-muted: #8b94a3;
+  --color-accent: #5eead4;
+  --color-ok: #4ade80;
+  --color-warn: #fbbf24;
+  --color-err: #fb7185;
+  --color-ch-1: #60a5fa;
+  --color-ch-2: #c084fc;
+  --color-ch-3: #fb923c;
+  --color-ch-4: #f472b6;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-accent) 35%, transparent);
 }
