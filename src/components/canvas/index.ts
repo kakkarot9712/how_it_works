@@ -5,7 +5,8 @@
  */
 export { Bar } from "./Bar";
 export { Boundary } from "./Boundary";
-export { rows, secs } from "./layout";
+export { FocusProvider, useFocus, UNFOCUSED_OPACITY } from "./Focus";
+export { LANE_MARGIN, PACKET_H, PACKET_LANE, PACKET_LANE_2, packetWidth, rows, secs } from "./layout";
 export { NodeBox } from "./NodeBox";
 export { Packet } from "./Packet";
 export { Wire } from "./Wire";

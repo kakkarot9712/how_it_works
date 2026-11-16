@@ -1,8 +1,9 @@
 import type { SimDefinition } from "@/sims/types";
 import { Canvas } from "./canvas/Canvas";
 import { Inspector } from "./inspector/Inspector";
-import { defaultComponents, defaultSettings, model, type Action, type Components, type Event, type Settings, type State } from "./model";
+import { defaultComponents, defaultSettings, model, nodeIds, type Action, type Components, type Event, type Settings, type State } from "./model";
 import { scenarios } from "./scenarios";
+import { sources } from "./sources";
 
 export const redisPubSub: SimDefinition<State, Event, Action, Settings, Components> = {
   model,
@@ -10,6 +11,8 @@ export const redisPubSub: SimDefinition<State, Event, Action, Settings, Componen
   scenarios,
   Canvas,
   Inspector,
+  sources,
+  nodeIds,
   timeNote: "Slow motion: a network hop takes ~0.45s here. On a real LAN it takes well under a millisecond.",
   components: [
     {

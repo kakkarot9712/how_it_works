@@ -1,5 +1,6 @@
 "use client";
 
+import type { SourceSet } from "@/lib/sources";
 import { useRef } from "react";
 import type { LogEntry } from "@/engine/types";
 import { Button, cx, IconButton, Pill, SegmentedControl } from "@/components/ui";
@@ -11,6 +12,7 @@ const SPEEDS = [0.25, 0.5, 1, 2, 4] as const;
 export function Timeline({
   now,
   horizon,
+  duration,
   log,
   playing,
   speed,
@@ -20,9 +22,12 @@ export function Timeline({
   onSeek,
   onSpeed,
   note,
+  version,
 }: {
   now: number;
   horizon: number;
+  /** The run's length: the track spans exactly this, whatever is clicked or played. */
+  duration: number;
   log: LogEntry[];
   playing: boolean;
   speed: number;
@@ -33,10 +38,12 @@ export function Timeline({
   onSpeed: (s: number) => void;
   /** Slow-motion disclosure, shown as a hoverable badge. */
   note?: string;
+  /** The version modelled, as a badge with the sources summary on hover. */
+  version?: SourceSet;
 }) {
   const track = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
-  const range = Math.max(30_000, Math.ceil((Math.max(horizon, now) + 5_000) / 10_000) * 10_000);
+  const range = duration;
   const pct = (t: number) => `${Math.min(100, (t / range) * 100)}%`;
 
   const seekFromPointer = (clientX: number) => {
@@ -48,7 +55,9 @@ export function Timeline({
   };
 
   const markers = log.filter((l) => l.level === "error" || l.level === "warn");
-  const ticks = Array.from({ length: range / 10_000 + 1 }, (_, i) => i * 10_000);
+  // About 3 to 7 labelled ticks, whatever the length.
+  const tickStep = [5_000, 10_000, 15_000, 30_000, 60_000, 120_000, 300_000].find((s) => range / s <= 7) ?? 600_000;
+  const ticks = Array.from({ length: Math.floor(range / tickStep) + 1 }, (_, i) => i * tickStep);
 
   return (
     <div className="flex items-center gap-3 border-t border-line bg-panel px-4 py-2.5">
@@ -57,7 +66,7 @@ export function Timeline({
           ⏮
         </IconButton>
         <Button tone="primary" onClick={onPlay} title="Play / pause (Space)" className="w-24 whitespace-nowrap">
-          {playing ? "❚❚ Pause" : "▶ Play"}
+          {playing ? "❚❚ Pause" : now >= duration ? "▶ Replay" : "▶ Play"}
         </Button>
         <Button tone="ghost" onClick={onStep} title="Process the next single event (.)">
           Step ›
@@ -100,7 +109,23 @@ export function Timeline({
       </div>
 
       <SegmentedControl label="Playback speed" options={SPEEDS} value={speed} onChange={onSpeed} format={(s) => `${s}×`} />
-      {note && <Pill title={note}>slow motion ⓘ</Pill>}
+      {note && (
+        <Pill tip={note}>
+          slow motion ⓘ
+        </Pill>
+      )}
+      {version && (
+        <Pill
+          tipHeading={`Modelled on ${version.subject} ${version.version}`}
+          tip={
+            <>
+              {version.versionNote} Sources: How it works → References.
+            </>
+          }
+        >
+          {version.label} ⓘ
+        </Pill>
+      )}
     </div>
   );
 }

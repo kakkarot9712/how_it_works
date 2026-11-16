@@ -23,7 +23,8 @@ if (!url || !out) {
   console.error("usage: shot.mjs <url> <out.png> [--size=WxH] [--click=sel] [--keys=A,B] [--full] [--scale=n] [--wait=ms]");
   process.exit(2);
 }
-const opt = Object.fromEntries(rest.map((a) => a.replace(/^--/, "").split("=")).map(([k, v]) => [k, v ?? true]));
+// Split on the first "=" only: selectors like a[href="#x"] contain "=" too.
+const opt = Object.fromEntries(rest.map((a) => a.replace(/^--/, "")).map((a) => { const i = a.indexOf("="); return i < 0 ? [a, true] : [a.slice(0, i), a.slice(i + 1)]; }));
 const [w, h] = String(opt.size ?? "1280x800").split("x").map(Number);
 const scale = Number(opt.scale ?? 1);
 

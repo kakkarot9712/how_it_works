@@ -21,7 +21,8 @@ const NOT_ACRONYMS = new Set([
   // Redis Streams commands, subcommands and options
   "XAUTOCLAIM", "XPENDING", "XGROUP", "XINFO", "XLEN", "XTRIM", "XDEL", "XRANGE", "XACKDEL", "XDELEX", "XNACK",
   "CREATE", "GROUP", "GROUPS", "STREAMS", "COUNT", "NOACK", "CLAIM", "MKSTREAM", "MAXLEN", "MINID", "JUSTID",
-  "KEEPREF", "DELREF", "ACKED",
+  "KEEPREF", "DELREF", "ACKED", "BUSYGROUP", "ENTRIESREAD", "LIMIT", "MAXCOUNT", "MAXSIZE", "NOMKSTREAM", "SETID",
+  "FAQ", // plain English in a page title ("Redis FAQ")
   // Units and plain words in caps
   "KB", "MB", "GB", "ASAP", "DOWN", "PROCESS", "OK", "ID",
   // UI / code words that end up in strings (class names, keys, element names)
@@ -73,6 +74,22 @@ for (const file of files(SRC)) {
   }
 }
 
+// SVG text can't hold <Term> tooltips. Every <text> in a canvas or diagram that shows a glossary
+// term must carry a native tooltip: <title>{glossaryTitles(…)}</title> (or glossaryTitle).
+const termRe = new RegExp(`\\b(${Object.keys(GLOSSARY).sort((a, b) => b.length - a.length).join("|")})(?=s?\\b)`);
+const svgMissing = [];
+for (const file of files(SRC)) {
+  if (!/\/canvas\/|Diagram\.tsx$/.test(file)) continue;
+  const src = readFileSync(file, "utf8").replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
+  for (const m of src.matchAll(/<text\b[^>]*>([\s\S]*?)<\/text>/g)) {
+    const t = m[1].match(termRe);
+    if (t && !m[1].includes("<title>")) {
+      const line = src.slice(0, m.index).split("\n").length;
+      svgMissing.push(`  ${t[1].padEnd(14)} ${relative(ROOT, file)}:${line}`);
+    }
+  }
+}
+
 if (process.argv.includes("--all")) {
   console.log("Glossed terms in use:");
   for (const [t, f] of [...used].sort()) console.log(`  ${t.padEnd(14)} ${[...f].join(", ")}`);
@@ -81,6 +98,11 @@ if (process.argv.includes("--all")) {
   console.log();
 }
 
+if (svgMissing.length) {
+  console.log("SVG text showing a glossary term without a tooltip (add <title>{glossaryTitles(text)}</title> inside the <text>):");
+  for (const l of svgMissing) console.log(l);
+  process.exitCode = 1;
+}
 if (missing.size === 0) {
   console.log("✓ Every all-caps token in user-facing text is glossed or listed as not an acronym.");
 } else {

@@ -24,9 +24,12 @@ export function PublisherNode({
   const fresh = r && now - r.at < 700;
   const tone = !r ? "muted" : r.error ? "err" : r.text === "(integer) 0" ? "warn" : "ok";
   return (
-    <NodeBox x={PUB.x} y={y} w={PUB.w} h={PUB.h} selected={selected} onSelect={onSelect}>
+    <NodeBox id={p.id} x={PUB.x} y={y} w={PUB.w} h={PUB.h} selected={selected} onSelect={onSelect}>
       <text x={PUB.x + 14} y={y + 26} className="fill-fg-muted text-svg-body">
         publisher
+      </text>
+      <text x={PUB.x + PUB.w - 14} y={y + 26} textAnchor="end" className="fill-fg-muted font-mono text-svg-body">
+        {p.auto ? `${p.intervalMs}ms` : "paused"}
       </text>
       <text x={PUB.x + 14} y={y + 52} className="fill-fg text-svg-title font-semibold">
         {p.label}
@@ -34,9 +37,6 @@ export function PublisherNode({
       <circle cx={PUB.x + 20} cy={y + 74} r={5.5} fill={CHANNEL_COLOR[p.channel]} />
       <text x={PUB.x + 32} y={y + 79} className="fill-fg font-mono text-svg-body">
         {p.channel}
-      </text>
-      <text x={PUB.x + PUB.w - 14} y={y + 79} textAnchor="end" className="fill-fg-muted font-mono text-svg-body">
-        {p.auto ? `every ${p.intervalMs}ms` : "paused"}
       </text>
       <text
         x={PUB.x + 14}

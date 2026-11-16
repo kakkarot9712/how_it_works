@@ -37,7 +37,11 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
   },
   RESP2: {
     expansion: "REdis Serialization Protocol, version 2",
-    brief: "The default protocol version. In RESP2 a subscribed connection can only run (P)SUBSCRIBE, (P)UNSUBSCRIBE, PING, RESET and QUIT.",
+    brief: "The default protocol version. In RESP2 a subscribed connection can only run (P|S)SUBSCRIBE, (P|S)UNSUBSCRIBE, PING, RESET and QUIT.",
+  },
+  RESP3: {
+    expansion: "REdis Serialization Protocol, version 3",
+    brief: "The newer protocol version, chosen per connection with HELLO 3. A subscribed RESP3 connection can still run any command.",
   },
   RDB: {
     expansion: "Redis Database file",
@@ -46,6 +50,14 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
   AOF: {
     expansion: "Append Only File",
     brief: "A log of every write command Redis replays on restart. Pub/Sub traffic isn't written to it.",
+  },
+  RFC: {
+    expansion: "Request for Comments",
+    brief: "The numbered documents that define internet standards. TCP, for example, is specified in RFC 9293.",
+  },
+  IETF: {
+    expansion: "Internet Engineering Task Force",
+    brief: "The standards body that develops internet protocols such as TCP and publishes them as RFCs.",
   },
   OOM: {
     expansion: "Out Of Memory",
@@ -81,7 +93,14 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
 
 /** Longest first, so RESP2 wins over RESP. */
 const TERMS = Object.keys(GLOSSARY).sort((a, b) => b.length - a.length);
-export const GLOSSARY_RE = new RegExp(`\\b(${TERMS.join("|")})\\b`, "g");
+/** Whole-word match, plus a plural "s" (PELs, ACKs): the "s" stays outside the captured term. */
+export const GLOSSARY_RE = new RegExp(`\\b(${TERMS.join("|")})(?=s?\\b)`, "g");
+
+/** Native tooltip text for every glossary term in `text` (for an SVG <title>), or undefined if it has none. */
+export function glossaryTitles(text: string): string | undefined {
+  const found = [...new Set([...text.matchAll(GLOSSARY_RE)].map((m) => m[1]))];
+  return found.length ? found.map((t) => glossaryTitle(t)).join("\n") : undefined;
+}
 
 /** One-line form for native tooltips (SVG <title>). */
 export function glossaryTitle(term: string): string | undefined {

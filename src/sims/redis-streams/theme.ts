@@ -17,7 +17,7 @@ export function consumerStatus(c: Consumer): { text: string; tone: Tone } {
   if (c.status === "reconnecting") return { text: "reconnecting…", tone: "warn" };
   if (c.hung) return { text: "hung", tone: "warn" };
   if (c.processing) return { text: "processing", tone: "ok" };
-  if (c.blockedSince !== null) return { text: "blocked, waiting", tone: "ok" };
+  if (c.blockedSince !== null) return { text: "blocked", tone: "ok" };
   return { text: "running", tone: "ok" };
 }
 

@@ -104,6 +104,18 @@ const RULES = [
     skip: (f) => f.includes("components/ui/"),
   },
   {
+    id: "native-title-tooltip",
+    re: /<(?:span|abbr|div|p|li|dt|dd|code|em|strong|small|Pill|Tag|Stat)\b[^>]*\stitle=/g,
+    why: "explanations use the shared Tooltip (Pill/Tag `tip`, <Tooltip>, or gloss() for acronyms), not a native title; title= is only for naming a control (a button's shortcut)",
+  },
+  {
+    id: "info-glyph-without-tooltip",
+    re: /ⓘ/g,
+    // An ⓘ promises an explanation on hover/focus/tap: it must sit in a Pill/Tag with `tip`, a <Tooltip>, or be a button that opens one.
+    unless: (lines, i) => lines.slice(Math.max(0, i - 8), i + 1).some((l) => /\btip[=:{]|<Tooltip\b|<IconButton\b|tipHeading=/.test(l)),
+    why: "an ⓘ must open the shared Tooltip (Pill `tip`, <Tooltip>) or be a button that opens a popover",
+  },
+  {
     id: "hand-rolled-scrollbar",
     re: /\[scrollbar-(?:width|color):/g,
     why: "use the scrollbar-thin utility",
@@ -127,6 +139,7 @@ for (const file of files(SRC)) {
     if (/^\s*(\/\/|\*|\/\*)/.test(line)) return; // comments
     for (const rule of RULES) {
       if (rule.skip?.(rel)) continue;
+      if (rule.unless?.(lines, i)) continue;
       for (const m of line.matchAll(rule.re)) out.push({ rel, line: i + 1, rule, hit: m[0] });
     }
   });

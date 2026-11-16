@@ -23,10 +23,10 @@ export function ConsumerNode({
   const { x, w, h } = CONS;
   const top = cy - h / 2;
   const st = consumerStatus(c);
-  const col = x + 70;
+  const col = x + 58;
   const slots = s.settings.count;
-  const step = Math.min(42, (w - 84) / slots);
-  const barW = w - 84;
+  const barW = w - 72;
+  const step = Math.min(42, barW / slots);
   const procF = c.processing ? Math.min(1, 1 - (c.procEnds - now) / c.processMs) : 0;
   const conn =
     c.status !== "running"
@@ -39,7 +39,7 @@ export function ConsumerNode({
   const off = c.status === "offline" || c.status === "crashed";
 
   return (
-    <NodeBox x={x} y={top} w={w} h={h} selected={selected} alert={c.status === "crashed"} onSelect={onSelect}>
+    <NodeBox id={c.id} x={x} y={top} w={w} h={h} selected={selected} alert={c.status === "crashed"} onSelect={onSelect}>
       <text x={x + 14} y={top + 25} className="fill-fg text-svg-title font-semibold">
         {c.label}
       </text>
@@ -90,8 +90,7 @@ export function ConsumerNode({
         <>
           <rect x={col} y={top + 85} width={barW * procF} height={19} rx={4} fill={GROUP_COLOR[c.group]} opacity={0.5} />
           <text x={col + 6} y={top + 99} className="fill-fg font-mono text-svg-caption">
-            order {c.processing.order}
-            {c.processing.deliveries > 1 ? ` (delivery ${c.processing.deliveries})` : ""}
+            {c.processing.deliveries > 1 ? `#${c.processing.order} (delivery ${c.processing.deliveries})` : `order ${c.processing.order}`}
           </text>
         </>
       )}

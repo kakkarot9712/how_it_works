@@ -1,8 +1,9 @@
 import { NodeBox } from "@/components/canvas";
 import { toneColor } from "@/components/ui";
-import { DEAD_KEY, lastId, RESTART_MS, STREAM_KEY, type State } from "../model";
+import { DEAD_KEY, lastId, RESTART_MS, STREAM as STREAM_ID, STREAM_KEY, type State } from "../model";
 import { GROUP_COLOR } from "../theme";
 import { STREAM, TAPE_CELLS } from "./layout";
+import { glossaryTitle } from "@/lib/glossary";
 
 const TAPE_X = 104;
 const CELL_GAP = 4;
@@ -22,7 +23,7 @@ export function StreamNode({ state: s, now, selected, onSelect }: { state: State
   const over = s.components.maxlen && len >= s.settings.maxLen;
 
   return (
-    <NodeBox x={x} y={y} w={w} h={h} surface="panel-2" rx={10} selected={selected} alert={!s.server.up} onSelect={onSelect}>
+    <NodeBox id={STREAM_ID} x={x} y={y} w={w} h={h} surface="panel-2" rx={10} selected={selected} alert={!s.server.up} onSelect={onSelect}>
       <text x={x + 16} y={y + 28} className="fill-fg-muted text-svg-body">
         stream <tspan className="fill-fg font-mono text-svg-title font-semibold">{STREAM_KEY}</tspan>
       </text>
@@ -105,13 +106,16 @@ export function StreamNode({ state: s, now, selected, onSelect }: { state: State
       )}
       <g transform={`translate(${x + 16} ${y + 182})`} className="fill-fg-muted text-svg-caption">
         <rect width={14} height={9} rx={2} y={1} fill="var(--color-ch-1)" opacity={0.55} />
-        <text x={20} y={10}>delivered + acked</text>
-        <rect x={150} width={14} height={9} rx={2} y={1} fill={toneColor.warn} />
-        <text x={170} y={10}>pending (PEL)</text>
-        <rect x={278} width={14} height={9} rx={2} y={1} fill={toneColor.err} />
-        <text x={298} y={10}>idle ≥ min-idle-time</text>
-        <rect x={436} width={14} height={9} rx={2} y={1} className="fill-bg stroke-line" />
-        <text x={456} y={10}>not delivered</text>
+        <text x={20} y={10}>acked</text>
+        <rect x={76} width={14} height={9} rx={2} y={1} fill={toneColor.warn} />
+        <text x={96} y={10}>
+          <title>{glossaryTitle("PEL")}</title>
+          pending (PEL)
+        </text>
+        <rect x={204} width={14} height={9} rx={2} y={1} fill={toneColor.err} />
+        <text x={224} y={10}>idle ≥ min-idle-time</text>
+        <rect x={382} width={14} height={9} rx={2} y={1} className="fill-bg stroke-line" />
+        <text x={402} y={10}>not delivered</text>
       </g>
 
       {!s.server.up && (
@@ -121,6 +125,7 @@ export function StreamNode({ state: s, now, selected, onSelect }: { state: State
             PROCESS DOWN
           </text>
           <text x={x + w / 2} y={y + h / 2 + 18} textAnchor="middle" className="fill-fg-muted text-svg-body">
+            <title>{glossaryTitle("AOF")}</title>
             {s.server.downSince !== null
               ? `restarting in ${Math.max(0, (s.server.downSince + RESTART_MS - now) / 1000).toFixed(1)}s, then reloading the AOF`
               : ""}

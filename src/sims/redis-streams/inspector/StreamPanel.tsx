@@ -27,7 +27,7 @@ export function StreamPanel({ s, dispatch }: { s: State; dispatch: (a: Action) =
         <ConfigLine>{s.components.maxlen ? `XADD ${STREAM_KEY} MAXLEN ${s.settings.maxLen} * …` : `XADD ${STREAM_KEY} * …`}</ConfigLine>
         <Help className="mt-1.5">
           {s.components.maxlen
-            ? "Exact trimming (=). Production code usually writes MAXLEN ~ 10000, which trims whole internal nodes and is cheaper. Either way trimming ignores consumer groups."
+            ? "Exact trimming (=). The Redis docs suggest MAXLEN ~ instead: it only removes whole internal nodes, which is much more efficient. Either way trimming ignores consumer groups."
             : "No trimming: the stream keeps every entry until memory runs out (or maxmemory evicts the whole key)."}
         </Help>
       </Section>

@@ -30,7 +30,7 @@ export function SubscriberNode({
   const procF = sub.processing ? Math.min(1, 1 - (sub.processingEnds - now) / sub.processMs) : 0;
 
   return (
-    <NodeBox x={SUB.x} y={top} w={SUB.w} h={SUB.h} selected={selected} onSelect={onSelect}>
+    <NodeBox id={sub.id} x={SUB.x} y={top} w={SUB.w} h={SUB.h} selected={selected} onSelect={onSelect}>
       <text x={x} y={top + 29} className="fill-fg text-svg-title font-semibold">
         {sub.label}
       </text>

@@ -1,19 +1,24 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import { Runtime } from "@/engine/runtime";
-import type { AnySimDefinition } from "@/sims/types";
-import { readSimUrl, writeScenarioUrl } from "./url";
+import { DEFAULT_DURATION_MS, type AnySimDefinition } from "@/sims/types";
+import { parseSimQuery, writeScenarioUrl } from "./url";
 
 const SEED = 42;
 
 /**
  * Owns a sim's run: the current scenario, the user's block/setting overrides, the
  * Runtime built from them, and the play/pause/speed animation loop. Changing the
- * scenario or any override rebuilds the run from t=0 (or from `?t=` on first load).
+ * scenario or any override rebuilds the run from t=0 (or from `?t=` when opened from a link).
  */
 export function useSimulation(def: AnySimDefinition) {
-  const [initial] = useState(() => readSimUrl(def.scenarios.map((s) => s.id)));
+  const params = useSearchParams();
+  const qs = params.get("s");
+  const qt = params.get("t");
+  const parse = () => parseSimQuery(def.scenarios.map((s) => s.id), qs, qt);
+  const [initial] = useState(parse);
   const [scenarioId, setScenarioId] = useState(initial.scenarioId);
   const scenario = def.scenarios.find((s) => s.id === scenarioId) ?? def.scenarios[0];
   const [settingsOv, setSettingsOv] = useState<Record<string, number>>({});
@@ -23,6 +28,23 @@ export function useSimulation(def: AnySimDefinition) {
   const [playing, setPlaying] = useState(initial.t === 0);
   const [speed, setSpeed] = useState(1);
   const [, force] = useReducer((x: number) => x + 1, 0);
+
+  // Follow the URL while mounted. Next keeps visited routes alive (cacheComponents), so a
+  // link back into the simulator (a write-up "Run it" or moment link) changes ?s=/?t=
+  // without remounting. Our own replaceState in loadScenario writes the scenario that is
+  // already loaded, so it changes nothing here.
+  const [seenQuery, setSeenQuery] = useState(`${qs}|${qt}`);
+  if (seenQuery !== `${qs}|${qt}`) {
+    setSeenQuery(`${qs}|${qt}`);
+    const next = parse();
+    if (next.scenarioId !== scenarioId || next.t > 0) {
+      setScenarioId(next.scenarioId);
+      setSettingsOv({});
+      setComponentsOv({});
+      setStartAt(next.t);
+      setPlaying(next.t === 0);
+    }
+  }
 
   const settings = { ...def.defaults.settings, ...scenario.settings, ...settingsOv };
   const components = { ...def.defaults.components, ...scenario.components, ...componentsOv };
@@ -34,7 +56,7 @@ export function useSimulation(def: AnySimDefinition) {
         settings: { ...def.defaults.settings, ...scenario.settings, ...settingsOv },
         components: { ...def.defaults.components, ...scenario.components, ...componentsOv },
       },
-      { seed: SEED, script: scenario.script },
+      { seed: SEED, script: scenario.script, maxDuration: scenario.duration ?? DEFAULT_DURATION_MS },
     );
     if (startAt > 0) r.advanceTo(startAt);
     return r;
@@ -65,6 +87,8 @@ export function useSimulation(def: AnySimDefinition) {
 
   return {
     scenario,
+    /** The run's length: playback stops here and the timeline spans exactly this. */
+    duration: runtime.maxDuration,
     scenarioIndex: def.scenarios.indexOf(scenario),
     runtime,
     settings,
@@ -83,6 +107,11 @@ export function useSimulation(def: AnySimDefinition) {
       setComponentsOv((o) => ({ ...o, [key]: v }));
     },
     resetOverrides,
+    /** Play/pause; at the end, play restarts from 0 (like a video). */
+    togglePlay: () => {
+      if (!playing && runtime.finished) runtime.seek(0);
+      setPlaying(!playing);
+    },
     seek: (t: number) => {
       runtime.seek(t);
       force();

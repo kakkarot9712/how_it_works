@@ -12,13 +12,13 @@ Read `docs/architecture.md` first. Use `src/sims/redis-pubsub/` as the reference
 A sim is only worth having if it's accurate. Before writing the model:
 
 1. List the real mechanisms to show: components, messages, state, config names and defaults, failure behaviors, log lines and error messages. Note every acronym you'll show (ISR, HW, LSN…): each needs a glossary entry (`glossary` skill).
-2. Check each one against official docs or source (use WebSearch/WebFetch if available). Note what you checked.
+2. Check each one against official docs or source, following the **`source-facts`** skill (mandatory): pick the version to model, read each official page, and record it in `sources.ts`. Anything the docs don't clearly support is cut, not kept for later. If unsure, ask the owner. Note what you checked.
 3. Decide what to simplify (time scale, units, protocol detail). These go in the explainer's "What this simulation simplifies" section.
 4. Choose:
    - **Controls** per node (what the user can break or drive). Every node a user would want to poke needs at least one action.
    - **Lego components**: 2 to 4 removable parts whose absence teaches something (e.g. ISR, acks, auto-reconnect, buffer limits).
    - **Settings**: numeric knobs worth exploring (latency, rates, limits, window sizes).
-   - **Scenarios**: 5 to 8 curated runs, one lesson each, starting with the happy path.
+   - **Scenarios**: 5 to 8 curated runs, one lesson each, starting with the happy path, each with a `flow` of where to look (`scenario-flow` skill).
 
 If anything here is a product decision (scope, which mechanisms to include), ask the owner before building.
 
@@ -26,11 +26,11 @@ If anything here is a product decision (scope, which mechanisms to include), ask
 
 ```
 src/sims/<sim-id>/
-  model.ts         State, Event, Action, Settings, Components, defaults, model (SimModel)
-  scenarios.ts     Scenario<Action, Settings, Components>[]
+  model.ts         State, Event, Action, Settings, Components, defaults, model (SimModel), nodeIds(state)
+  scenarios.ts     Scenario<Action, Settings, Components>[], each with a flow (scenario-flow) and optional duration (default 30 s)
   theme.ts         traffic-kind colours (ch-1..4) and status → Tone helpers shared by canvas and inspector
   canvas/
-    layout.ts      viewBox size + one box per column
+    layout.ts      viewBox size + one box per column + LANE_GAP (packet lanes, checked by lanes.test.ts)
     Canvas.tsx     "use client"; composes nodes, wires and packets from @/components/canvas
     <Kind>Node.tsx one per node type, built on NodeBox (+ Bar, etc.)
   inspector/
@@ -40,7 +40,8 @@ src/sims/<sim-id>/
     Explainer.tsx  server; `meta` + Explainer({ simHref }) from @/components/writeup (see write-explainer)
     <Name>Diagram.tsx static SVG figure(s) for the write-up
   walkthroughs.ts  per-scenario walkthroughs for /how-it-works, checked by walkthroughs.test.ts
-  index.ts         SimDefinition export (components/settings defs, timeNote)
+  sources.ts       version modelled + official references, in first-citation order (source-facts skill)
+  index.ts         SimDefinition export (components/settings defs, timeNote, sources)
   model.test.ts    behavior tests per scenario + rewind determinism
 ```
 
@@ -54,9 +55,9 @@ src/sims/<sim-id>/
 
 ## 3. Canvas and Inspector
 
-- SVG viewBox about 1160×760. Text uses the SVG type scale only (`text-svg-body` by default, `text-svg-title` for node titles; see the `design-system` skill). Leave the top-left corner empty (zoom controls sit there). Colours come from theme tokens, the tone tables and the sim's `theme.ts` channel map.
+- SVG viewBox about 1160×760. Text uses the SVG type scale only (`text-svg-body` by default, `text-svg-title` for node titles; see the `design-system` skill). Leave the top-left corner empty (zoom controls sit there). Leave packet lanes wide enough for their labels and export `LANE_GAP` from `canvas/layout.ts` (see `ui-components`, Lanes); `lanes.test.ts` enforces it. SVG `<text>` showing an acronym (PEL, AOF, TCP…) needs `<title>{glossaryTitle("PEL")}</title>` inside it; the glossary audit enforces this. Colours come from theme tokens, the tone tables and the sim's `theme.ts` channel map.
 - Don't add zoom or pan code: the Player wraps every Canvas in ZoomPan.
-- Every clickable node is a `NodeBox` with `selected` and `onSelect` (it handles the highlight and stops the click from deselecting). Messages in flight are `Packet`s drawn before the nodes; links are `Wire`s (`broken` when cut); processes/hosts are `Boundary`s.
+- Every clickable node is a `NodeBox` with `id`, `selected` and `onSelect` (it handles the highlight and stops the click from deselecting). Wires and packets take `ends={[a, b]}` node ids, and `model.ts` exports `nodeIds(state)`, so the scenario flow spotlight works (`scenario-flow` skill). Messages in flight are `Packet`s drawn before the nodes; links are `Wire`s (`broken` when cut); processes/hosts are `Boundary`s.
 - Show the state that carries the lesson: `Bar`s with limit markers, timers counting up, status text in tone colours.
 - Inspector: one panel per node type: `InspectorHeader`, a "Break it" `Section` of controls, a "Stats" `Section` (`StatGrid`), and a short `Help` note. With nothing selected, `InspectorEmpty`.
 - If you need something the kits don't have and a second sim would want it too, add it to the kit (see `ui-components`), not to the sim.
@@ -77,6 +78,8 @@ In `model.test.ts`, run each scenario with `new Runtime(model, params, { seed: 4
 - every scenario rewinds and replays to an identical state (copy the loop from `redis-pubsub/model.test.ts`).
 
 Also `walkthroughs.test.ts` (copy from redis-pubsub): every scenario has a walkthrough and every timed moment matches the narration.
+
+The cross-sim tests pick a new sim up automatically from its folder: `sources.test.ts` (source-facts), `flows.test.ts` (each scenario's flow names real nodes and everything fits its duration) and `lanes.test.ts` (packet labels fit their gaps). They need `sources.ts`, an exported `nodeIds` in `model.ts`, `walkthroughs.ts`, and `LANE_GAP` in `canvas/layout.ts`.
 
 ## 6. Verify
 

@@ -265,7 +265,7 @@ function publish(s: State, ctx: Ctx, pubId: string, channel?: string) {
     publisher: pubId,
     publishedAt: ctx.now,
   };
-  const packet = sendPacket(s, ctx, { kind: "publish", from: pubId, to: SERVER, label: `PUBLISH ${ch}`, channel: ch });
+  const packet = sendPacket(s, ctx, { kind: "publish", from: pubId, to: SERVER, label: ch, channel: ch }); // the pill shows the channel; PUBLISH is implied by the lane
   ctx.schedule(packet.arriveAt - ctx.now, { type: "publish-arrive", msg, packet: packet.id });
 }
 
@@ -363,7 +363,7 @@ function drain(s: State, ctx: Ctx, sub: Subscriber) {
     s.flags.explainedWindow[sub.id] = true;
     ctx.log("info", `${sub.label} isn't reading fast enough: messages pile up in its output buffer`, {
       detail:
-        "The kernel socket buffers (TCP window) are full, so write() would block. Redis never blocks its event loop: it keeps the remaining data in the client's output buffer in its own memory.",
+        "The kernel socket buffers (TCP window) are full, so write() would block. Redis uses non-blocking sockets and never waits for a slow client: it keeps the remaining data in the client's output buffer in its own memory.",
       node: bufNode(sub.id),
     });
   }
@@ -698,11 +698,9 @@ export const model: SimModel<State, Event, Action, Params> = {
           return;
         }
         sub.client = "connecting";
-        const cmd = [
-          ...(sub.channels.length ? [`SUBSCRIBE ${sub.channels.join(" ")}`] : []),
-          ...(sub.patterns.length ? [`PSUBSCRIBE ${sub.patterns.join(" ")}`] : []),
-        ].join(" + ");
-        const p = sendPacket(s, ctx, { kind: "subscribe", from: sub.id, to: SERVER, label: cmd });
+        // The pill shows the command name only; the full command is on the subscriber card.
+        const label = sub.channels.length && sub.patterns.length ? "SUBSCRIBE+" : sub.channels.length ? "SUBSCRIBE" : "PSUBSCRIBE";
+        const p = sendPacket(s, ctx, { kind: "subscribe", from: sub.id, to: SERVER, label });
         ctx.schedule(p.arriveAt - ctx.now, { type: "subscribe-arrive", sub: sub.id, packet: p.id });
         return;
       }
@@ -859,4 +857,9 @@ export const model: SimModel<State, Event, Action, Params> = {
 /** Live derived numbers for the UI. */
 export function derived(s: State) {
   return { memBytes: memUsed(s) };
+}
+
+/** Every node id the canvas draws (NodeBox `id`), for `SimDefinition.nodeIds` and flow tests. */
+export function nodeIds(s: State): string[] {
+  return [...s.pubIds, SERVER, ...s.subIds.map(bufNode), ...s.subIds];
 }

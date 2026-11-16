@@ -312,7 +312,7 @@ function onXadd(s: State, ctx: Ctx, prodId: string, order: number, poison: boole
       prod.failNoted = true;
       ctx.log("error", `${prod.label}: XADD order ${order} failed, Redis is down`, {
         detail:
-          "The entry never reached the stream. Only a producer that retries (or writes to an outbox first) keeps it. (Further failures during this outage are not listed.)",
+          "The entry never reached the stream. Only a producer that retries keeps it. (Further failures during this outage are not listed.)",
         node: prodId,
       });
     }
@@ -1058,3 +1058,8 @@ export const model: SimModel<State, Event, Action, Params> = {
     }
   },
 };
+
+/** Every node id the canvas draws (NodeBox `id`), for `SimDefinition.nodeIds` and flow tests. */
+export function nodeIds(s: State): string[] {
+  return [...s.prodIds, STREAM, ...s.groupIds.map(groupNode), ...s.consIds];
+}

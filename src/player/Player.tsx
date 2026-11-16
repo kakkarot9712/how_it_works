@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { FocusProvider } from "@/components/canvas";
 import { Button } from "@/components/ui";
 import type { AnySimDefinition } from "@/sims/types";
 import { BlocksDrawer } from "./BlocksDrawer";
+import { activeStep, FlowBar } from "./FlowBar";
 import { LogFeed } from "./LogFeed";
 import { ScenarioBar } from "./ScenarioBar";
 import { Timeline } from "./Timeline";
@@ -24,6 +26,19 @@ export function Player({ def }: { def: AnySimDefinition }) {
   const [selected, setSelected] = useState<string | null>(scenario.select ?? null);
   const [drawer, setDrawer] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [spotlight, setSpotlight] = useState(true);
+
+  const [watch, setWatch] = useState(readWatchPref);
+  const toggleWatch = () => {
+    writeWatchPref(!watch);
+    setWatch(!watch);
+  };
+
+  // The scenario's flow step at this moment; the canvas spotlights its nodes.
+  const stepIndex = activeStep(scenario.flow, runtime.now);
+  const step = scenario.flow[stepIndex];
+  // Hiding the Watch strip also pauses the spotlight: dimming with no note would be unexplained.
+  const focus = useMemo(() => (spotlight && watch && step ? new Set(step.nodes) : null), [spotlight, watch, step]);
 
   const loadScenario = (i: number) => {
     const sc = def.scenarios[i];
@@ -43,12 +58,14 @@ export function Player({ def }: { def: AnySimDefinition }) {
   };
 
   useShortcuts({
-    Space: () => sim.setPlaying((p) => !p),
+    Space: sim.togglePlay,
     ".": sim.step,
     ArrowLeft: () => sim.seek(runtime.now - 1000),
     ArrowRight: () => sim.seek(runtime.now + 1000),
     "[": () => loadScenario(sim.scenarioIndex - 1),
     "]": () => loadScenario(sim.scenarioIndex + 1),
+    f: () => setSpotlight((v) => !v),
+    h: toggleWatch,
   });
 
   const view = { state: runtime.state, now: runtime.now, selected, select: setSelected, dispatch: sim.dispatch };
@@ -65,6 +82,11 @@ export function Player({ def }: { def: AnySimDefinition }) {
           modified={sim.customized}
           actions={
             <>
+              {!watch && (
+                <Button onClick={toggleWatch} title="Show the Watch strip: where to look, step by step (H)">
+                  <span className="whitespace-nowrap">Watch {stepIndex + 1}/{scenario.flow.length}</span>
+                </Button>
+              )}
               <Button tone={drawer ? "primary" : "default"} onClick={() => setDrawer((d) => !d)}>
                 <span className="whitespace-nowrap">⚙ Blocks & settings</span>
               </Button>
@@ -75,9 +97,22 @@ export function Player({ def }: { def: AnySimDefinition }) {
           }
         />
 
+        {step && watch && (
+          <FlowBar
+            flow={scenario.flow}
+            current={stepIndex}
+            spotlight={spotlight}
+            onSpotlight={() => setSpotlight((v) => !v)}
+            onJump={(s) => sim.seek(s.at)}
+            onHide={toggleWatch}
+          />
+        )}
+
         <div className="relative min-h-0 flex-1">
           <ZoomPan>
-            <Canvas {...view} />
+            <FocusProvider nodes={focus}>
+              <Canvas {...view} />
+            </FocusProvider>
           </ZoomPan>
           {drawer && (
             <BlocksDrawer
@@ -96,15 +131,17 @@ export function Player({ def }: { def: AnySimDefinition }) {
         <Timeline
           now={runtime.now}
           horizon={runtime.horizon}
+          duration={sim.duration}
           log={runtime.log}
           playing={sim.playing}
           speed={sim.speed}
-          onPlay={() => sim.setPlaying((p) => !p)}
+          onPlay={sim.togglePlay}
           onStep={sim.step}
           onRestart={() => sim.seek(0)}
           onSeek={sim.seek}
           onSpeed={sim.setSpeed}
           note={def.timeNote}
+          version={def.sources}
         />
       </main>
 
@@ -128,4 +165,19 @@ export function Player({ def }: { def: AnySimDefinition }) {
       </aside>
     </div>
   );
+}
+
+// Whether the Watch strip is shown: a per-viewer preference, so it may be unavailable.
+const WATCH_KEY = "syswork:watch-strip";
+function readWatchPref() {
+  try {
+    return localStorage.getItem(WATCH_KEY) !== "hidden";
+  } catch {
+    return true;
+  }
+}
+function writeWatchPref(shown: boolean) {
+  try {
+    localStorage.setItem(WATCH_KEY, shown ? "shown" : "hidden");
+  } catch {}
 }

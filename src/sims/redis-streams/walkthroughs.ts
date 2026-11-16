@@ -102,7 +102,7 @@ export const walkthroughs: Walkthrough[] = [
       },
     ],
     takeaway:
-      "Redis never redelivers on its own. Pending entries of a dead consumer stay put until some consumer claims them, which is why every consumer group deployment needs an XAUTOCLAIM (or XPENDING + XCLAIM) loop.",
+      "Redis never redelivers on its own. Pending entries of a dead consumer stay put until another consumer claims them, with XAUTOCLAIM or XPENDING + XCLAIM.",
     tryNext: [
       "Pull out the **XAUTOCLAIM loop** block: the four entries stay pending for good, until you **Bring online** mailer-1.",
       "Lower **min-idle-time** and see how much sooner they're rescued.",
@@ -226,7 +226,7 @@ export const walkthroughs: Walkthrough[] = [
         text: "mailer-1 restarts, finds nothing pending, and carries on with new entries. The four orders are never emailed. (analytics, a separate group, still processed them.)",
       },
     ],
-    takeaway: "NOACK turns a consumer group into at-most-once delivery: cheaper (no PEL, no XACK round trip) and fine for metrics, but a crash silently drops work.",
+    takeaway: "NOACK turns a consumer group into at-most-once delivery, meant for when occasional loss is acceptable: a crash silently drops whatever the consumer held.",
     tryNext: ["Put the block back and rerun: the same crash leaves four pending entries that mailer-1 re-reads on restart."],
   },
   {

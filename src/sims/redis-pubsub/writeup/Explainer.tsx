@@ -1,7 +1,8 @@
-import { AnnotatedConfig, Callout, Compare, Figure, Prose, TryIt, WriteupSection } from "@/components/writeup";
+import { AnnotatedConfig, Callout, citer, Compare, Figure, Prose, TryIt, WriteupSection } from "@/components/writeup";
 import type { WriteupMeta } from "@/sims/explainers";
 import { PathDiagram } from "./PathDiagram";
 import { scenarios } from "../scenarios";
+import { sources } from "../sources";
 
 export const meta: WriteupMeta = {
   title: "How Redis Pub/Sub actually works",
@@ -32,16 +33,18 @@ function see(...ids: string[]) {
   });
 }
 
+const cite = citer(sources);
+
 /** Long-form write-up for /redis/pub-sub/how-it-works (server component). */
 export function Explainer({ simHref }: { simHref: string }) {
   return (
     <Prose>
       <WriteupSection id="path" title="The path of one message">
         <p>
-          A client runs <code>SUBSCRIBE orders</code> and its connection switches into a subscribed state. Redis adds the
+          A client runs <code>SUBSCRIBE orders</code> and its connection switches into a subscribed state.{cite("pubsub")} Redis adds the
           connection to the subscriber list for <code>orders</code> (a dictionary from channel name to client list).{" "}
           <code>PSUBSCRIBE pay*</code> adds the connection to a separate list of glob patterns. That&apos;s all the state
-          there is: subscriptions live on connections, in memory.
+          there is: subscriptions live on connections, in memory.{cite("pubsub-c")}
         </p>
         <Figure
           caption={
@@ -50,14 +53,16 @@ export function Explainer({ simHref }: { simHref: string }) {
                 <code className="font-mono text-fg">PUBLISH orders &quot;order#42&quot;</code> arrives on the publisher&apos;s
                 connection.
               </li>
-              <li>Redis looks up the channel&apos;s subscriber list, then checks every pattern.</li>
               <li>
-                For each match it appends the message to that client&apos;s output buffer and replies to the publisher with
-                the number of receivers.
+                Redis looks up the channel&apos;s subscriber list, then checks every pattern.{cite("pubsub-c")}
               </li>
               <li>
-                The event loop writes each buffer to its socket as far as the kernel accepts. What doesn&apos;t fit stays in
-                the output buffer, in Redis&apos;s memory.
+                For each match it appends the message to that client&apos;s output buffer and replies to the publisher with
+                the number of receivers.{cite("pubsub-c", "clients")}
+              </li>
+              <li>
+                Redis writes each buffer to its non-blocking socket as far as the kernel accepts. What doesn&apos;t fit
+                stays in the output buffer, in Redis&apos;s memory.{cite("clients")}
               </li>
             </ol>
           }
@@ -67,34 +72,35 @@ export function Explainer({ simHref }: { simHref: string }) {
         <p>
           Each delivery is a RESP array: <code>[&quot;message&quot;, channel, payload]</code>, or{" "}
           <code>[&quot;pmessage&quot;, pattern, channel, payload]</code> for pattern matches. A client subscribed to both a
-          channel and a matching pattern receives the message twice.
+          channel and a matching pattern receives the message twice.{cite("pubsub")}
         </p>
         <TryIt simHref={simHref} items={see("fan-out")} />
       </WriteupSection>
 
       <WriteupSection id="at-most-once" title="At-most-once, no storage">
         <p>
-          Nothing is written to a log, RDB or AOF. Subscribers send no acknowledgements. If nobody is subscribed when{" "}
-          <code>PUBLISH</code> runs, the message is discarded and the reply is <code>0</code>. If a subscriber is
-          restarting, it misses everything published in the meantime, and there&apos;s no offset to resume from. Each
-          message is delivered at most once.
+          Pub/Sub has no relation to the key space, so messages never reach RDB snapshots, and <code>PUBLISH</code> is
+          propagated to replicas but not written to the AOF.{cite("pubsub", "pubsub-c")} Subscribers send no
+          acknowledgements. If nobody is subscribed when <code>PUBLISH</code> runs, the message is discarded and the reply
+          is <code>0</code>. If a subscriber is restarting, it misses everything published in the meantime, and there&apos;s
+          no offset to resume from. Each message is delivered at most once.{cite("pubsub")}
         </p>
         <p>
           The subscriptions aren&apos;t persisted either. When Redis restarts, every connection is gone along with its
           subscriptions. Until each client reconnects and runs <code>SUBSCRIBE</code> again, <code>PUBLISH</code> reaches
-          nobody.
+          nobody.{cite("pubsub-c")}
         </p>
         <TryIt simHref={simHref} items={see("void", "offline", "restart")} />
       </WriteupSection>
 
       <WriteupSection id="output-buffer" title="Push delivery and the output buffer">
         <p>
-          Pub/Sub is <em>push</em>-based: Redis writes to the subscriber whether or not it&apos;s ready. Redis runs a
-          single-threaded event loop and never blocks on a slow socket. When the kernel&apos;s socket buffers are full (TCP
-          flow control has closed the window), the remaining bytes wait in the client output buffer, in Redis&apos;s own
-          memory. A slow consumer becomes Redis&apos;s memory problem.
+          Pub/Sub is <em>push</em>-based: Redis writes to the subscriber whether or not it&apos;s ready.{cite("resp")} Redis
+          uses non-blocking sockets, so it never waits for a slow client. When the kernel&apos;s socket buffers are full
+          (TCP flow control has closed the window), the remaining bytes wait in the client output buffer, in Redis&apos;s
+          own memory.{cite("clients", "rfc9293")} A slow consumer becomes Redis&apos;s memory problem.
         </p>
-        <p>That&apos;s why Redis ships with a limit for Pub/Sub clients. The default:</p>
+        <p>That&apos;s why Redis ships with a limit for Pub/Sub clients. The default:{cite("clients", "redis-conf")}</p>
         <AnnotatedConfig
           parts={[
             { token: "client-output-buffer-limit", label: "directive" },
@@ -110,26 +116,28 @@ export function Explainer({ simHref }: { simHref: string }) {
           </li>
           <li>
             <strong>Soft limit:</strong> if the buffer stays above 8mb continuously for 60 seconds, the client is closed.
-            Dropping below resets the timer.
+            Dropping below resets the timer.{cite("redis-conf")}
           </li>
         </ul>
         <p>
-          When a client is closed, its whole output buffer is freed and those messages are lost. Redis logs{" "}
-          <code>Client … scheduled to be closed ASAP for overcoming of output buffer limits.</code> A client that
-          reconnects while still slow hits the limit again, and keeps doing so.
+          When a client is closed, the messages still in its output buffer are lost.{cite("pubsub")} Redis logs{" "}
+          <code>Client … scheduled to be closed ASAP for overcoming of output buffer limits.</code>
+          {cite("networking-c")} A client that reconnects while still slow hits the limit again.
         </p>
         <TryIt simHref={simHref} items={see("hard-limit", "soft-limit")} />
       </WriteupSection>
 
       <WriteupSection id="no-limit" title="Without the limit">
         <p>
-          Setting the limit to <code>0 0 0</code> removes it. A stuck subscriber&apos;s buffer then grows without bound.
+          Setting the limit to <code>0 0 0</code> removes it.{cite("redis-conf")} A stuck subscriber&apos;s buffer then grows
+          without bound.
         </p>
         <Callout tone="warn" title="One consumer, everyone's outage">
           <p>
-            Client output buffers count toward <code>used_memory</code>, so with <code>maxmemory</code> set, Redis may
-            start evicting <em>your keys</em> to make room. Without it, the host eventually runs out of RAM and the OOM
-            killer stops Redis, disconnecting every client, including the healthy ones.
+            Client buffers are Redis memory, and enough of them lead to data eviction or out-of-memory errors.
+            {cite("clients")} Without swap, the Linux OOM killer can kill the Redis process{cite("admin")}, logging{" "}
+            <code>Out of memory: Killed process …</code>{cite("oom-kill-c")}, and every client is disconnected, including
+            the healthy ones.
           </p>
         </Callout>
         <TryIt simHref={simHref} items={see("oom")} />
@@ -139,20 +147,20 @@ export function Explainer({ simHref }: { simHref: string }) {
         <p>
           If the network to a subscriber breaks silently, no FIN or RST arrives. Redis only sees that the TCP window
           stopped opening, which is exactly what a slow reader looks like, so the buffer grows until the limit closes the
-          client.
+          client.{cite("rfc9293")}
         </p>
         <p>
           The subscriber only reads and never sends, so it may not notice for a long time: the connection is{" "}
           <em>half-open</em>. TCP keepalive (Redis defaults to <code>tcp-keepalive 300</code> on its side) or an
-          application-level <code>PING</code> health check is how clients detect it.
+          application-level <code>PING</code> health check is how clients detect it.{cite("rfc9293", "clients", "pubsub")}
         </p>
         <TryIt simHref={simHref} items={see("partition")} />
       </WriteupSection>
 
       <WriteupSection id="alternatives" title="When to use something else">
         <p>
-          Pub/Sub is the right tool when losing a message is acceptable: cache invalidation, presence, live dashboards. When
-          it isn&apos;t, the difference is whether the broker keeps the data and who sets the pace.
+          Pub/Sub is the right tool when losing a message is acceptable; for stronger guarantees the Redis docs point to
+          Streams.{cite("pubsub")} The difference is whether the broker keeps the data and who sets the pace.
         </p>
         <Compare
           head={["", "Redis Pub/Sub", "Redis Streams", "Kafka"]}
@@ -169,18 +177,22 @@ export function Explainer({ simHref }: { simHref: string }) {
             ],
           ]}
         />
+        <p className="text-note">
+          Sources: Pub/Sub{cite("pubsub")}, Streams{cite("streams-intro")}, Kafka{cite("kafka-design", "kafka-consumer", "kafka-intro")}.
+        </p>
         <ul>
           <li>
             Need to survive consumer restarts, or replay history? Use <strong>Redis Streams</strong>: an append-only log
-            with consumer groups, acknowledgements (<code>XACK</code>) and a pending entries list.
+            with consumer groups, acknowledgements (<code>XACK</code>) and a pending entries list.{cite("streams-intro")}
           </li>
           <li>
-            Need durable, high-throughput, replayable messaging where slow consumers can&apos;t hurt the broker? Use a{" "}
-            <strong>pull</strong>-based log like Kafka: consumers fetch at their own pace and only fall behind (lag).
+            Need durable, replayable messaging where each consumer sets its own pace? Use a <strong>pull</strong>-based log
+            like Kafka: consumers fetch what they can handle and fall behind (lag) instead of filling a broker buffer.
+            {cite("kafka-design")}
           </li>
           <li>
             On Redis Cluster 7+, <code>SSUBSCRIBE</code>/<code>SPUBLISH</code> (sharded Pub/Sub) keep traffic on the shard
-            that owns the channel&apos;s slot instead of broadcasting to every node.
+            that owns the channel&apos;s slot instead of broadcasting to every node.{cite("pubsub")}
           </li>
         </ul>
       </WriteupSection>
@@ -193,11 +205,9 @@ export function Explainer({ simHref }: { simHref: string }) {
               TCP is modelled as a fixed window of messages rather than bytes, segments and ACK clocking. Retransmission
               uses a fixed timeout.
             </li>
-            <li>Message sizes approximate the RESP encoding. Real Redis adds some per-reply-block overhead.</li>
-            <li>
-              Redis checks the soft limit when it appends to or drains a client&apos;s buffer, which is modelled the same
-              way here.
-            </li>
+            <li>Message sizes approximate the RESP encoding.</li>
+            <li>The model checks the soft limit whenever a client&apos;s buffer grows or drains.</li>
+            <li>The kernel&apos;s OOM log line is shortened: the real one continues with the process&apos;s memory figures.</li>
           </ul>
         </Callout>
       </WriteupSection>

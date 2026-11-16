@@ -244,7 +244,8 @@ export function ScenarioPicker({
                           <Tag
                             key={c.key}
                             tone={c.on ? "ok" : "err"}
-                            title={c.on ? "This scenario adds this block" : "This scenario removes this block"}
+                            tip={c.on ? "This scenario adds this building block." : "This scenario removes this building block."}
+                            tipFocusable={false}
                           >
                             {c.on ? "+" : "−"} {c.label}
                           </Tag>

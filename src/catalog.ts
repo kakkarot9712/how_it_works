@@ -64,7 +64,7 @@ export const topics: Topic[] = [
       {
         slug: "consumer-groups",
         title: "Consumer groups",
-        summary: "Pull-based consumers, lag, offset commits, rebalancing, and why a slow consumer never hurts the broker.",
+        summary: "Pull-based consumers, lag, offset commits and rebalancing.",
         status: "planned",
         concepts: ["pull delivery", "at-least-once", "backpressure"],
       },

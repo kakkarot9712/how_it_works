@@ -1,4 +1,7 @@
+"use client";
+
 import { cx } from "@/lib/cx";
+import { UNFOCUSED_OPACITY, useFocus } from "./Focus";
 
 /** A connection between two points. `broken` draws it dashed red with a ✕ in the middle (a cut network link). */
 export function Wire({
@@ -9,6 +12,7 @@ export function Wire({
   curve,
   broken,
   faded,
+  ends,
 }: {
   x1: number;
   y1: number;
@@ -19,14 +23,17 @@ export function Wire({
   broken?: boolean;
   /** De-emphasise (e.g. an unregistered subscription). */
   faded?: boolean;
+  /** Node ids at both ends, so the flow spotlight can highlight or dim the link. */
+  ends?: [string, string];
 }) {
-  const cls = cx(broken ? "stroke-err" : faded ? "stroke-line/30" : "stroke-line");
+  const focus = useFocus(ends);
+  const cls = cx(broken ? "stroke-err" : faded ? "stroke-line/30" : focus === "on" ? "stroke-accent/70" : "stroke-line");
   const d = curve
     ? `M${x1} ${y1} C ${x1 + 16} ${y1}, ${x2 - 16} ${y2}, ${x2} ${y2}`
     : `M${x1} ${y1} L${x2} ${y2}`;
   return (
-    <g>
-      <path d={d} fill="none" className={cls} strokeWidth={curve ? 1.3 : 1.6} strokeDasharray={broken ? "5 5" : undefined} />
+    <g opacity={focus === "off" ? UNFOCUSED_OPACITY : 1} className="transition-opacity">
+      <path d={d} fill="none" className={cls} strokeWidth={(curve ? 1.3 : 1.6) * (focus === "on" ? 1.6 : 1)} strokeDasharray={broken ? "5 5" : undefined} />
       {broken && (
         <g transform={`translate(${(x1 + x2) / 2} ${(y1 + y2) / 2})`}>
           <circle r={13} className="fill-bg stroke-err" />

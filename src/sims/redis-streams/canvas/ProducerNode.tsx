@@ -23,7 +23,7 @@ export function ProducerNode({
   const fresh = r && now - r.at < 700;
   const tone = !r ? "muted" : r.error ? "err" : "ok";
   return (
-    <NodeBox x={x} y={y} w={w} h={h} selected={selected} onSelect={onSelect}>
+    <NodeBox id={p.id} x={x} y={y} w={w} h={h} selected={selected} onSelect={onSelect}>
       <text x={x + 14} y={y + 24} className="fill-fg-muted text-svg-body">
         producer
       </text>

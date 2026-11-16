@@ -8,12 +8,15 @@ export function WriteupHero({
   title,
   lede,
   facts,
+  modelledOn,
   actions,
 }: {
   eyebrow: string;
   title: string;
   lede: string;
   facts: { label: string; value: string }[];
+  /** "Redis Open Source 8.10": the version the model follows, linked to the References section. */
+  modelledOn?: string;
   actions?: ReactNode;
 }) {
   return (
@@ -25,6 +28,14 @@ export function WriteupHero({
         </Heading>
         <p className="mt-4 text-lg leading-relaxed text-fg-muted">{gloss(lede)}</p>
         <FactStrip facts={facts} />
+        {modelledOn && (
+          <p className="mt-3 text-note text-fg-muted">
+            Modelled on <span className="font-mono text-fg">{modelledOn}</span> ·{" "}
+            <a href="#references" className="underline decoration-line underline-offset-2 hover:text-fg">
+              sources
+            </a>
+          </p>
+        )}
         {actions && <div className="mt-8 flex flex-wrap items-center gap-3">{actions}</div>}
       </WriteupGrid>
     </header>

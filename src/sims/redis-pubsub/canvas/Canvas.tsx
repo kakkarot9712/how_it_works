@@ -1,6 +1,6 @@
 "use client";
 
-import { Boundary, Packet, rows, Wire } from "@/components/canvas";
+import { Boundary, Packet, PACKET_LANE as L, PACKET_LANE_2 as L2, rows, Wire } from "@/components/canvas";
 import { toneColor } from "@/components/ui";
 import type { ViewProps } from "@/sims/types";
 import { bufNode, SERVER, type Action, type Packet as PacketState, type State } from "../model";
@@ -20,19 +20,22 @@ export function Canvas({ state: s, now, selected, select }: ViewProps<State, Act
   const pubY = Object.fromEntries(rows(s.pubIds.length, 170, H - 170).map((y, i) => [s.pubIds[i], y]));
   const subY = Object.fromEntries(rows(s.subIds.length, 16, H - 16).map((y, i) => [s.subIds[i], y]));
 
+  /** A y on the core card's right edge, as close to `y` as its rounded corners allow. */
+  const coreY = (y: number) => Math.min(CORE.y + CORE.h - 24, Math.max(CORE.y + 24, y));
+
   // Where each kind of packet travels from and to.
   const endpoints = (p: PacketState): [number, number, number, number] => {
     switch (p.kind) {
       case "publish":
-        return [PUB.x + PUB.w, pubY[p.from] - 16, CORE.x, pubY[p.from] - 16];
+        return [PUB.x + PUB.w, pubY[p.from] - L, CORE.x, pubY[p.from] - L];
       case "reply":
-        return [CORE.x, pubY[p.to] + 18, PUB.x + PUB.w, pubY[p.to] + 18];
+        return [CORE.x, pubY[p.to] + L, PUB.x + PUB.w, pubY[p.to] + L];
       case "deliver":
-        return [BUF.x + BUF.w, subY[p.to] - 13, SUB.x, subY[p.to] - 13];
+        return [BUF.x + BUF.w, subY[p.to] - L, SUB.x, subY[p.to] - L];
       case "fin":
-        return [BUF.x + BUF.w, subY[p.to] + 14, SUB.x, subY[p.to] + 14];
+        return [BUF.x + BUF.w, subY[p.to] + L, SUB.x, subY[p.to] + L];
       case "subscribe":
-        return [SUB.x, subY[p.from] + 40, BUF.x + BUF.w, subY[p.from] + 40];
+        return [SUB.x, subY[p.from] + L2, BUF.x + BUF.w, subY[p.from] + L2];
     }
   };
   const packetColor = (p: PacketState) =>
@@ -51,14 +54,23 @@ export function Canvas({ state: s, now, selected, select }: ViewProps<State, Act
 
       {/* wires */}
       {s.pubIds.map((id) => (
-        <Wire key={id} x1={PUB.x + PUB.w} y1={pubY[id]} x2={CORE.x} y2={pubY[id]} />
+        <Wire key={id} ends={[id, SERVER]} x1={PUB.x + PUB.w} y1={pubY[id]} x2={CORE.x} y2={pubY[id]} />
       ))}
       {s.subIds.map((id) => {
         const sub = s.subscribers[id];
         return (
           <g key={id}>
-            <Wire curve faded={!sub.registered} x1={CORE.x + CORE.w} y1={H / 2} x2={BUF.x} y2={subY[id]} />
-            <Wire broken={!sub.linkUp} x1={BUF.x + BUF.w} y1={subY[id]} x2={SUB.x} y2={subY[id]} />
+            {/* Straight across at the buffer's height; curves only if a row falls outside the core card. */}
+            <Wire
+              curve={coreY(subY[id]) !== subY[id]}
+              ends={[SERVER, bufNode(id)]}
+              faded={!sub.registered}
+              x1={CORE.x + CORE.w}
+              y1={coreY(subY[id])}
+              x2={BUF.x}
+              y2={subY[id]}
+            />
+            <Wire ends={[bufNode(id), id]} broken={!sub.linkUp} x1={BUF.x + BUF.w} y1={subY[id]} x2={SUB.x} y2={subY[id]} />
           </g>
         );
       })}
@@ -69,6 +81,7 @@ export function Canvas({ state: s, now, selected, select }: ViewProps<State, Act
         return (
           <Packet
             key={p.id}
+            ends={[p.from, p.to]}
             x1={x1}
             y1={y1}
             x2={x2}
@@ -76,7 +89,7 @@ export function Canvas({ state: s, now, selected, select }: ViewProps<State, Act
             sentAt={p.sentAt}
             arriveAt={p.arriveAt}
             now={now}
-            label={p.kind === "publish" ? (p.channel ?? p.label) : p.label}
+            label={p.label}
             color={packetColor(p)}
           />
         );

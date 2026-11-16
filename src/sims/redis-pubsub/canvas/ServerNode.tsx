@@ -1,8 +1,9 @@
 import { Bar, NodeBox } from "@/components/canvas";
 import { toneColor } from "@/components/ui";
-import { CHANNELS, derived, kb, RESTART_MS, type State } from "../model";
+import { CHANNELS, derived, kb, RESTART_MS, SERVER, type State } from "../model";
 import { CHANNEL_COLOR } from "../theme";
 import { CORE } from "./layout";
+import { glossaryTitle } from "@/lib/glossary";
 
 /** redis-server's core: channel and pattern tables, client-buffer memory gauge, and a "PROCESS DOWN" overlay. */
 export function ServerNode({ state: s, now, selected, onSelect }: { state: State; now: number; selected: boolean; onSelect: () => void }) {
@@ -13,7 +14,7 @@ export function ServerNode({ state: s, now, selected, onSelect }: { state: State
   const patterns = s.subIds.flatMap((id) => (s.subscribers[id].registered ? s.subscribers[id].patterns.map((p) => [p, id]) : []));
 
   return (
-    <NodeBox x={CORE.x} y={CORE.y} w={CORE.w} h={CORE.h} selected={selected} alert={!s.server.up} onSelect={onSelect}>
+    <NodeBox id={SERVER} x={CORE.x} y={CORE.y} w={CORE.w} h={CORE.h} selected={selected} alert={!s.server.up} onSelect={onSelect}>
       <text x={CORE.x + 16} y={CORE.y + 34} className="fill-fg text-svg-title font-semibold">
         redis-server
       </text>
@@ -56,7 +57,10 @@ export function ServerNode({ state: s, now, selected, onSelect }: { state: State
 
       {/* memory gauge */}
       <g transform={`translate(${CORE.x + 16} ${CORE.y + CORE.h - 80})`}>
-        <text className="fill-fg-muted text-svg-caption uppercase tracking-wider">client buffers in RAM</text>
+        <text className="fill-fg-muted text-svg-caption uppercase tracking-wider">
+          <title>{glossaryTitle("RAM")}</title>
+          client buffers in RAM
+        </text>
         <Bar x={0} y={12} width={CORE.w - 32} height={12} rx={6} track="panel-2" value={memF} color={toneColor[memTone]} />
         <text y={46} className="fill-fg-muted font-mono text-svg-body">
           {kb(mem)} / {s.settings.headroomKb} KB headroom

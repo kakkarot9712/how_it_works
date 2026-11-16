@@ -50,20 +50,24 @@ A sim exports a `SimDefinition`:
 | `defaults` | `{ settings, components }` |
 | `settings` | numeric knobs (slider defs). Changing one rebuilds the run |
 | `components` | removable lego blocks (boolean). Toggling rebuilds the run |
-| `scenarios` | curated runs: title, summary, `watchFor`, partial settings and components, `script` of timed actions, initial `select` |
+| `scenarios` | curated runs: title, summary, `watchFor`, partial settings and components, `script` of timed actions, initial `select`, and `flow`: timed steps naming the nodes to follow, with a note each |
+| `nodeIds` | every node id the canvas draws, so tests can check flow steps |
 | `Canvas` | SVG diagram, receives `{ state, now, selected, select, dispatch }` |
 | `Inspector` | per-node controls and stats, same props |
 | `timeNote` | slow-motion disclosure under the canvas |
 
 The **Player** (`src/player/`) is shared and fills its parent's height. `Player.tsx` composes `useSimulation` (scenario, overrides, Runtime, animation loop), `useShortcuts`, `ScenarioBar`/`ScenarioPicker`, `BlocksDrawer`, `LogFeed`, `Timeline` and `ZoomPan`; `url.ts` owns the deep-link format:
 
-- header: scenario picker (dropdown + prev/next), summary, "watch for" bullets, "Blocks & settings" drawer toggle, "Link to moment"
+- header, one row: scenario picker (dropdown + prev/next), ⓘ popover with the summary and "what to look for" (`ScenarioInfo`), "Blocks & settings" drawer toggle, "Link to moment". Text stays off the page so the canvas gets the height
+- Watch strip (`FlowBar`): the scenario's flow steps, the current note and the Spotlight switch. While it is on, `FocusProvider` gives the canvas kit the step's node ids: `NodeBox` (by `id`) haloes them, `Wire`/`Packet` (by `ends`) light the links and messages between them, and everything else dims. The selected node always stays lit. The strip can be hidden (✕ or `H`, remembered per browser); a "Watch n/m" toolbar button brings it back, and the spotlight pauses while it is hidden
 - canvas wrapped in **ZoomPan** (`src/player/ZoomPan.tsx`): wheel/pinch zooms around the cursor (50–400%), drag pans, `+`/`-`/`0` keys, on-screen controls. It uses a CSS transform on a wrapper, so sims need no zoom code. A drag never triggers a node click.
 - the drawer (over the canvas, left side) holds lego toggles and setting sliders
-- timeline: play/pause/step/seek/speed, warn/error markers, slow-motion badge (keyboard: Space, `.`, ←/→)
+- timeline: play/pause/step/seek/speed, warn/error markers, slow-motion and version hint chips (keyboard: Space, `.`, ←/→; `F` spotlight, `H` Watch strip, `[`/`]` scenarios)
 - right column: inspector (selected node's controls) and narration feed. Narration entries are clickable and jump to that moment.
 
-**Deep links:** `?s=<scenarioId>&t=<ms>` opens a scenario paused at `t`. The "link to this moment" button copies such a link. Links encode scenario and time only, not user actions or overrides.
+**Run length:** every scenario has a fixed `duration` (default `DEFAULT_DURATION_MS`, 30 s), passed to the Runtime as `maxDuration`. Playback stops there (Play becomes Replay and restarts from 0), seeking and deep links clamp to it, and the timeline spans exactly that, with tick spacing chosen for 3 to 7 labels. `flows.test.ts` fails if a script action, flow step or walkthrough moment falls past it.
+
+**Deep links:** `?s=<scenarioId>&t=<ms>` opens a scenario paused at `t`. The "link to this moment" button copies such a link. Links encode scenario and time only, not user actions or overrides. `useSimulation` reads them with `useSearchParams()` and follows changes while mounted, because `cacheComponents` keeps visited routes alive (a write-up "Run it" link back into an open simulator changes the query without remounting). The player's own scenario switch uses `history.replaceState`, which the same hook sees as no change.
 
 ## Routing and rendering
 
@@ -77,10 +81,10 @@ The **Player** (`src/player/`) is shared and fills its parent's height. `Player.
 
 UI is built from shared kits in `src/components/` (details and conventions in the `ui-components` skill):
 
-- `ui/`: primitives (Button, LinkButton, Toggle, Slider, Stat/StatGrid, Section, Pill, Tag, Eyebrow, Help) and the **tone** tables (`ok`/`warn`/`err`/`accent`/`muted` → text, badge, border, SVG fill, CSS colour). State colours always go through a tone.
-- `canvas/`: SVG building blocks for sim diagrams: NodeBox, Packet, Bar, Boundary, Wire, `rows()`.
+- `ui/`: primitives (Button, LinkButton, Toggle, Slider, Stat/StatGrid, Section, Pill, Tag, Eyebrow, Help), `Tooltip` (the one explanatory tooltip; `Term`, `Pill tip` and `Tag tip` use it) and the **tone** tables (`ok`/`warn`/`err`/`accent`/`muted` → text, badge, border, SVG fill, CSS colour). State colours always go through a tone.
+- `canvas/`: SVG building blocks for sim diagrams: NodeBox, Packet, Bar, Boundary, Wire, `rows()`; the flow spotlight (`FocusProvider`, `useFocus`); packet lane sizes (`packetWidth`, `PACKET_LANE`, `LANE_MARGIN`). Each sim's `canvas/layout.ts` exports `LANE_GAP`, checked by `lanes.test.ts`.
 - `inspector/`: InspectorHeader, InspectorEmpty, ConfigLine.
-- `writeup/`: everything on `/how-it-works`.
+- `writeup/`: everything on `/how-it-works`, including `Cite`/`citer` and `References` (source-facts skill).
 - `site/`: Logo, SiteHeader, SimNav, SimCard, SimGrid.
 
 A sim keeps its own UI in `canvas/` (one file per node type), `inspector/` (one panel per node type) and `writeup/`, plus `theme.ts` for its traffic colours and status helpers.
@@ -93,7 +97,7 @@ Dark console theme, defined as design tokens in `src/app/globals.css` and docume
 - **Type:** two scales. HTML: `2xs` 11, `xs` 12, `note` 13, `sm` 14, `body` 15, `base` 16, then headings. SVG, in viewBox units: `svg-caption` 12.5, `svg-body` 13.5, `svg-strong` 15.5, `svg-title` 19, `svg-display` 22.
 - **Everything else:** radius by role, two elevations (`shadow-popover`, `shadow-drawer`), five z-layers, one global `:focus-visible` ring, and the `scrollbar-thin` utility.
 
-`.claude/skills/design-system/audit.mjs` flags anything off-scale. The canvas uses SVG user units (Redis Pub/Sub: 1160×760) and must be legible at fit on 1280×800. Keep UI overlays (zoom controls) in the canvas's top-left, which layouts should leave empty.
+`.claude/skills/design-system/audit.mjs` flags anything off-scale. The canvas uses SVG user units (both Redis sims: 1160×760) and must be legible at fit on 1280×800. Keep UI overlays (zoom controls) in the canvas's top-left, which layouts should leave empty.
 
 ## Planned engine additions
 

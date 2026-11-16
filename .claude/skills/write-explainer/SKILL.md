@@ -22,7 +22,7 @@ The page shell (hero, contents rail, walkthrough cards) is shared. Don't edit `p
 
 ## 1. Research first
 
-List every claim you'll make: config names and defaults, command and reply formats, log lines, error messages, protocol behaviour. Check each against official docs or source, and say in your report what you checked. Don't invent a config option, metric or log line. If you can't verify something, leave it out or label it as a simplification.
+List every claim you'll make: config names and defaults, command and reply formats, log lines, error messages, protocol behaviour. Source each one under the **`source-facts`** skill: read the official page, add it to the sim's `sources.ts`, and put `{cite("id")}` after the sentence (`const cite = citer(sources)` at the top of the Explainer). Every section except "What this simulation simplifies" needs at least one citation. If you can't verify something, leave it out (or describe it as a model choice under simplifications), or ask the owner for a source. Say in your report what you checked.
 
 ## 2. meta
 
@@ -48,7 +48,7 @@ Writing style:
 
 ## 4. Diagrams
 
-Inline SVG in `writeup/` named `<Name>Diagram.tsx` (the design audit treats `*Diagram.tsx` as SVG). Use theme tokens only (`fill-panel-2`, `stroke-line`, `fill-fg-muted`, `var(--color-ch-1)`, toneColor) and the SVG type scale (`text-svg-caption` / `text-svg-body`); see the `design-system` skill. Use a viewBox of ~780 wide and set `min-w-[720px]` on the svg so the Figure scrolls sideways on phones instead of shrinking the text. Show a contrast (one healthy row, one slow, one not matched), not just the happy path. Put the explanation in the caption (real text), not in the SVG.
+Inline SVG in `writeup/` named `<Name>Diagram.tsx` (the design audit treats `*Diagram.tsx` as SVG). Use theme tokens only (`fill-panel-2`, `stroke-line`, `fill-fg-muted`, `var(--color-ch-1)`, toneColor) and the SVG type scale (`text-svg-caption` / `text-svg-body`); see the `design-system` skill. Use a viewBox of ~780 wide and set `min-w-[720px]` on the svg so the Figure scrolls sideways on phones instead of shrinking the text. Show a contrast (one healthy row, one slow, one not matched), not just the happy path. Put the explanation in the caption (real text), not in the SVG. SVG `<text>` that shows an acronym needs `<title>{glossaryTitle(term)}</title>` inside it (the glossary audit checks `*Diagram.tsx`).
 
 ## 5. Walkthroughs (one per scenario)
 

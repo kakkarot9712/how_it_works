@@ -8,7 +8,7 @@ description: Verify a change to syswork end to end - tests, typecheck, lint, pro
 ## 1. Static checks
 
 ```bash
-pnpm test && pnpm typecheck && pnpm lint && pnpm build
+pnpm test && pnpm typecheck && pnpm lint && pnpm build   # pnpm test includes sources.test.ts (source-facts), flows.test.ts (scenario-flow), lanes.test.ts (packet labels fit their gaps)
 node .claude/skills/glossary/audit.mjs        # every acronym in user-facing text has a definition
 node .claude/skills/design-system/audit.mjs   # no off-scale sizes, raw colours, stray shadows/z-index, focus overrides
 ```
@@ -35,7 +35,9 @@ SHOT=.claude/skills/verify-simulation/shot.mjs
 node $SHOT "http://localhost:3123/redis/pub-sub?s=hard-limit&t=9500" "$SCRATCH/hard-limit.png"                 # 1280x800
 node $SHOT "http://localhost:3123/redis/pub-sub?s=hard-limit&t=9500" "$SCRATCH/hard-limit-1440.png" --size=1440x900
 node $SHOT "http://localhost:3123/redis/pub-sub?s=oom&t=1000" "$SCRATCH/menu.png" --click='[aria-haspopup=listbox]' --keys=ArrowDown
-node $SHOT "http://localhost:3123/redis/pub-sub?s=partition&t=3000" "$SCRATCH/tooltip.png" --hover='main abbr'   # glossary tooltip
+node $SHOT "http://localhost:3123/redis/streams?s=dead-consumer&t=8000" "$SCRATCH/tooltip.png" --hover='main abbr'   # glossary tooltip (PEL in the Watch note)
+node $SHOT "http://localhost:3123/redis/streams?s=happy&t=3500" "$SCRATCH/info.png" --click='[aria-label="About this scenario"]'   # ⓘ popover
+node $SHOT "http://localhost:3123/redis/streams?s=happy&t=3000" "$SCRATCH/chip.png" --hover='span.rounded-full.cursor-help ~ span.rounded-full.cursor-help'   # hint-chip tooltip (version)
 node $SHOT "http://localhost:3123/redis/pub-sub/how-it-works" "$SCRATCH/hiw.png" --full --scale=0.75
 node $SHOT "http://localhost:3123/redis/pub-sub/how-it-works" "$SCRATCH/hiw-phone.png" --size=390x844 --full
 ```
@@ -57,5 +59,7 @@ Save screenshots to the session scratchpad, not the repo. Pick `t` at the moment
 - [ ] Also check `/` and the topic page if the catalog changed. Unknown paths return 404: `curl -s -o /dev/null -w "%{http_code}" localhost:3123/nope`.
 
 ## 4. Clean up
+
+For a scenario change, also screenshot two or three of its flow steps (`t` just after each `flow[].at`): the Watch note must match what's on screen, and the lit nodes must be the ones the note is about (`scenario-flow` skill).
 
 Stop the server (`pkill -f next-server`). Report what you checked and anything you couldn't verify, such as zoom/pan, drag or keyboard behavior, which screenshots don't cover.

@@ -1,0 +1,133 @@
+import type { SourceSet } from "@/lib/sources";
+
+/**
+ * Every claim in this module (model narration, canvas, inspector, scenarios, walkthroughs,
+ * write-up) must be supported by one of these. Ordered by first citation in the Explainer.
+ * See the `source-facts` skill before adding a claim or a reference.
+ */
+export const sources: SourceSet = {
+  subject: "Redis Open Source",
+  version: "8.10",
+  label: "Redis 8.10",
+  versionNote:
+    "Pub/Sub, output buffer limits and their defaults are documented for this release and have been stable for many releases; sharded Pub/Sub (Redis 7.0+) is marked where mentioned. Source-code references point to the Redis and Linux repositories as of the date checked.",
+  checked: "2026-11-16",
+  officialSources: [
+    "https://redis.io/docs/",
+    "https://raw.githubusercontent.com/redis/redis/",
+    "https://github.com/redis/redis/",
+    "https://raw.githubusercontent.com/torvalds/linux/",
+    "https://github.com/torvalds/linux/",
+    "https://kafka.apache.org/",
+    "https://www.rfc-editor.org/rfc/",
+  ],
+  references: [
+    {
+      id: "pubsub",
+      title: "Redis Pub/Sub",
+      publisher: "Redis documentation",
+      url: "https://redis.io/docs/latest/develop/pubsub/",
+      accessed: "2026-11-16",
+      covers: [
+        "PUBLISH", "SUBSCRIBE", "PSUBSCRIBE", "UNSUBSCRIBE", "PUNSUBSCRIBE", "SSUBSCRIBE", "SUNSUBSCRIBE", "SPUBLISH", "PING",
+        "RESET", "QUIT", "HELLO", "RESP3",
+      ],
+    },
+    {
+      id: "pubsub-c",
+      title: "src/pubsub.c (channel and pattern tables, PUBLISH)",
+      publisher: "Redis source repository",
+      url: "https://raw.githubusercontent.com/redis/redis/unstable/src/pubsub.c",
+      accessed: "2026-11-16",
+      covers: ["PUBLISH", "SPUBLISH", "PSUBSCRIBE"],
+    },
+    {
+      id: "clients",
+      title: "Redis client handling",
+      publisher: "Redis documentation",
+      url: "https://redis.io/docs/latest/develop/reference/clients/",
+      accessed: "2026-11-16",
+      covers: ["CLIENT", "KILL", "maxmemory-clients"],
+    },
+    {
+      id: "resp",
+      title: "Redis serialization protocol specification",
+      publisher: "Redis documentation",
+      url: "https://redis.io/docs/latest/develop/reference/protocol-spec/",
+      accessed: "2026-11-16",
+      covers: ["HELLO", "RESP3"],
+    },
+    {
+      id: "rfc9293",
+      title: "RFC 9293: Transmission Control Protocol (TCP)",
+      publisher: "IETF",
+      url: "https://www.rfc-editor.org/rfc/rfc9293.html",
+      accessed: "2026-11-16",
+      covers: [],
+    },
+    {
+      id: "redis-conf",
+      title: "redis.conf (self-documented default configuration)",
+      publisher: "Redis source repository",
+      url: "https://raw.githubusercontent.com/redis/redis/unstable/redis.conf",
+      accessed: "2026-11-16",
+      covers: ["client-output-buffer-limit", "tcp-keepalive", "appendonly", "appendfsync"],
+    },
+    {
+      id: "networking-c",
+      title: "src/networking.c (output buffer limit log line)",
+      publisher: "Redis source repository",
+      url: "https://raw.githubusercontent.com/redis/redis/unstable/src/networking.c",
+      accessed: "2026-11-16",
+      covers: ["ASAP"],
+    },
+    {
+      id: "admin",
+      title: "Redis administration",
+      publisher: "Redis documentation",
+      url: "https://redis.io/docs/latest/operate/oss_and_stack/management/admin/",
+      accessed: "2026-11-16",
+      covers: ["maxmemory"],
+    },
+    {
+      id: "oom-kill-c",
+      title: "mm/oom_kill.c (OOM killer log line)",
+      publisher: "Linux kernel source",
+      url: "https://raw.githubusercontent.com/torvalds/linux/master/mm/oom_kill.c",
+      accessed: "2026-11-16",
+      covers: [],
+    },
+    {
+      id: "streams-intro",
+      title: "Redis Streams",
+      publisher: "Redis documentation",
+      url: "https://redis.io/docs/latest/develop/data-types/streams/",
+      accessed: "2026-11-16",
+      covers: ["XADD", "XREAD", "XREADGROUP", "XACK", "XCLAIM", "XAUTOCLAIM", "XPENDING", "BLOCK"],
+    },
+    {
+      id: "kafka-design",
+      title: "Apache Kafka design (4.3)",
+      publisher: "Apache Kafka documentation",
+      url: "https://kafka.apache.org/43/design/design/",
+      accessed: "2026-11-16",
+      covers: [],
+    },
+    {
+      id: "kafka-consumer",
+      title: "KafkaConsumer (Kafka 4.3 API)",
+      publisher: "Apache Kafka documentation",
+      url: "https://kafka.apache.org/43/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html",
+      accessed: "2026-11-16",
+      covers: [],
+    },
+    {
+      id: "kafka-intro",
+      title: "Introduction (Kafka 4.3)",
+      publisher: "Apache Kafka documentation",
+      url: "https://kafka.apache.org/43/getting-started/introduction/",
+      accessed: "2026-11-16",
+      covers: [],
+    },
+  ],
+};

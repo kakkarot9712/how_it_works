@@ -1,3 +1,4 @@
+import { glossaryTitle } from "@/lib/glossary";
 /**
  * Static diagram for the write-up: the path of one PUBLISH through Redis.
  * Server component, theme tokens only. Laid out in a 780×300 viewBox.
@@ -46,7 +47,7 @@ export function PathDiagram() {
 
       {/* redis-server process boundary */}
       <rect x={145} y={8} width={360} height={284} rx={14} className="fill-none stroke-line" strokeDasharray="6 5" />
-      <text x={158} y={30} className="fill-fg-muted text-svg-body">redis-server process memory · one thread</text>
+      <text x={158} y={30} className="fill-fg-muted text-svg-body">redis-server process memory</text>
 
       {/* lookup tables */}
       <rect x={160} y={52} width={140} height={196} rx={10} className="fill-panel-2 stroke-line" />
@@ -132,6 +133,7 @@ export function PathDiagram() {
         grows when the socket is full
       </text>
       <text x={SOCK.x + SOCK.w / 2} y={270} textAnchor="middle" className="fill-fg-muted text-svg-caption">
+        <title>{glossaryTitle("TCP")}</title>
         kernel + TCP window
       </text>
       <text x={SUB.x + SUB.w / 2} y={270} textAnchor="middle" className="fill-fg-muted text-svg-caption">

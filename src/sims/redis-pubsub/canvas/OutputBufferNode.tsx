@@ -1,6 +1,6 @@
 import { Bar, NodeBox } from "@/components/canvas";
 import { toneColor } from "@/components/ui";
-import { kb, type State, type Subscriber } from "../model";
+import { bufNode, kb, type State, type Subscriber } from "../model";
 import { CHANNEL_COLOR } from "../theme";
 import { BUF } from "./layout";
 
@@ -34,15 +34,15 @@ export function OutputBufferNode({
     : sub.obufBytes > scale * 0.6
       ? "err"
       : "ok";
-  const chips = sub.obuf.slice(0, 18);
+  const chips = sub.obuf.slice(0, 12);
 
   return (
-    <NodeBox x={BUF.x} y={top} w={BUF.w} h={BUF.h} rx={10} surface="panel-2" selected={selected} dim={!sub.registered} onSelect={onSelect}>
+    <NodeBox id={bufNode(sub.id)} x={BUF.x} y={top} w={BUF.w} h={BUF.h} rx={10} surface="panel-2" selected={selected} dim={!sub.registered} onSelect={onSelect}>
       <text x={BUF.x + 14} y={top + 25} className="fill-fg-muted text-svg-body">
         output buffer
       </text>
       <text x={BUF.x + BUF.w - 14} y={top + 25} textAnchor="end" className="fill-fg font-mono text-svg-body">
-        {sub.registered ? `${kb(sub.obufBytes)} · ${sub.obuf.length} msg` : "closed"}
+        {sub.registered ? kb(sub.obufBytes) : "closed"}
       </text>
       <Bar
         x={BUF.x + 14}
@@ -64,11 +64,16 @@ export function OutputBufferNode({
           <rect key={m.id} x={i * 10.5} y={0} width={8} height={13} rx={2} fill={CHANNEL_COLOR[m.channel]} opacity={0.85} />
         ))}
         {sub.obuf.length > chips.length && (
-          <text x={chips.length * 10.5 + 4} y={12} className="fill-fg-muted font-mono text-svg-body">
-            +{sub.obuf.length - chips.length}
+          <text x={chips.length * 10.5 + 2} y={12} className="fill-fg-muted font-mono text-svg-body">
+            …
           </text>
         )}
       </g>
+      {sub.registered && (
+        <text x={BUF.x + BUF.w - 14} y={top + 75} textAnchor="end" className="fill-fg font-mono text-svg-body">
+          {sub.obuf.length} msg
+        </text>
+      )}
       <text x={BUF.x + 14} y={top + BUF.h - 12} className="text-svg-body" fill={sub.softSince !== null ? toneColor.warn : toneColor.muted}>
         {!limits
           ? "no limit configured"

@@ -1,3 +1,4 @@
+import { glossaryTitle } from "@/lib/glossary";
 /**
  * Static diagram for the write-up: one stream, two consumer groups at different
  * positions, their PELs, and the consumers. Server component, theme tokens only.
@@ -116,6 +117,7 @@ export function StreamDiagram() {
           <path d={`M${cellX(g.last) + CELL.w} ${g.y + 28} l0 13`} stroke={g.color} strokeWidth={2.5} />
           {g.pel.map((line, i) => (
             <text key={line} x={168} y={g.y + 60 + i * 18} className="fill-fg-muted font-mono text-svg-caption">
+              <title>{glossaryTitle("PEL")}</title>
               {i === 0 ? "PEL " : "    "}
               <tspan className="fill-fg">{line}</tspan>
             </text>
@@ -141,6 +143,7 @@ export function StreamDiagram() {
         XACK removes the
       </text>
       <text x={712} y={313} textAnchor="middle" className="fill-fg-muted text-svg-caption">
+        <title>{glossaryTitle("PEL")}</title>
         entry from the PEL
       </text>
 

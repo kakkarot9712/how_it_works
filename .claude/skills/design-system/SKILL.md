@@ -102,6 +102,7 @@ Rules:
 - **Disabled:** `opacity-40` and `cursor-not-allowed` (built into `Button`).
 - **Danger** ("break it" actions): `Button tone="danger"` or `Toggle tone="danger"`.
 - **Focus:** one global `:focus-visible` ring (2px accent, 2px offset) in `globals.css`. Don't remove or restyle it. The only exception is a container that shows focus another way (a listbox with `aria-activedescendant`), marked `design-ok`.
+- **Tooltips (explanations):** one look and one behaviour everywhere: the shared `Tooltip` (`components/ui/Tooltip.tsx`). Raised surface with the popover shadow, `z-50`, `text-note`, an optional bold heading line, opens on hover, keyboard focus or tap, and flips below when there's no room above. Glossary terms (`Term`, via `gloss()`) use it with a dotted underline; hint chips are a `Pill` with `tip` (and `tipHeading`) whose label ends in `ⓘ`; tags take `tip` too. Tooltip text is plain: don't `gloss()` inside a tooltip (it can't be hovered, so the underline would promise a definition it can't show). A native `title` attribute is only for naming a control (a button's action and shortcut: "Play / pause (Space)"), never for an explanation. A click-to-open panel (the scenario ⓘ) is a popover, not a tooltip.
 - **Motion:** colour, opacity and transform transitions only (`transition-colors`, `transition-opacity`, `transition-transform`, default duration; `duration-300` for progress bars). No bouncing, no motion that carries meaning. The simulation's own animation is the only movement that matters.
 - **Scrolling panels and menus:** the `scrollbar-thin` utility.
 - **Glyphs** instead of an icon library: ▶ play/run, ❚❚ pause, ⏮ restart, ‹ › step, ▼ menu, ✕ close or cut, ⚙ settings, ⧉ copy link, ↓ → navigation, ● status dot, ▸ list bullet. Reuse these; don't add an icon set.
@@ -130,6 +131,7 @@ Short, concrete and active. Sentence case. Say what happens, not what the UI is 
 - **Off-scale values:** off-scale font sizes, raw or default-palette colours, arbitrary colours, shadows other than popover/drawer, z-index outside 10–50, off-role radii, arbitrary line height.
 - **Mixed scales:** HTML sizes in SVG files and `text-svg-*` outside them.
 - **Overrides:** removed or restyled focus rings, and hand-rolled scrollbars.
+- **Tooltips:** a native `title=` on text or a chip (`span`, `Pill`, `Tag`…) instead of the shared `Tooltip`, and an `ⓘ` that doesn't open one.
 - **Rebuilt components:** hand-written uppercase labels (use `Eyebrow`), bordered boxes (use `Surface`), headings (use `Heading`), `h-7 w-7` glyph buttons (use `IconButton`), and `mx-auto max-w-6xl` (use `Container`).
 
 `components/ui/` itself is exempt from the "rebuilt components" rules: that's where the patterns live.
@@ -138,4 +140,4 @@ Short, concrete and active. Sentence case. Say what happens, not what the UI is 
 
 1. `node .claude/skills/design-system/audit.mjs` passes.
 2. `pnpm typecheck && pnpm lint && pnpm build`.
-3. Screenshots with the `verify-simulation` skill's `shot.mjs`: the simulator (1280×800 and 1440×900), the open scenario menu (`--click`), a tooltip (`--hover`), the write-up (1440 and 390 wide, `--full`), the home page, and a keyboard focus state (`--keys=Tab,Tab`). Check type sizes match their role, nothing has a stray colour or shadow, and focus is visible.
+3. Screenshots with the `verify-simulation` skill's `shot.mjs`: the simulator (1280×800 and 1440×900), the open scenario menu (`--click`), a glossary tooltip and a hint-chip tooltip (`--hover`), the write-up (1440 and 390 wide, `--full`), the home page, and a keyboard focus state (`--keys=Tab,Tab`). Check type sizes match their role, nothing has a stray colour or shadow, and focus is visible.

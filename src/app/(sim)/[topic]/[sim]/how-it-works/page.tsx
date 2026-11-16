@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { getSim, topics } from "@/catalog";
 import { SimNav } from "@/components/site";
 import { LinkButton } from "@/components/ui";
-import { ScenarioWalkthroughs, Toc, WriteupGrid, WriteupHero } from "@/components/writeup";
+import { References, ScenarioWalkthroughs, Toc, WriteupGrid, WriteupHero } from "@/components/writeup";
 import { writeups } from "@/sims/explainers";
 
 export function generateStaticParams() {
@@ -38,6 +38,7 @@ async function Content({ params }: { params: PageProps<"/[topic]/[sim]/how-it-wo
   const { Explainer } = writeup;
 
   const walkthroughsTitle = "Every scenario, step by step";
+  const referencesTitle = "References";
 
   return (
     <>
@@ -47,6 +48,7 @@ async function Content({ params }: { params: PageProps<"/[topic]/[sim]/how-it-wo
         title={writeup.title}
         lede={writeup.lede}
         facts={writeup.facts}
+        modelledOn={`${writeup.sources.subject} ${writeup.sources.version}`}
         actions={
           <>
             <LinkButton href={base} size="lg">
@@ -58,7 +60,11 @@ async function Content({ params }: { params: PageProps<"/[topic]/[sim]/how-it-wo
           </>
         }
       />
-      <WriteupGrid className="py-14" rail={<Toc sections={[...writeup.sections, { id: "scenarios", title: walkthroughsTitle }]} />}>
+      <WriteupGrid className="py-14" rail={
+          <Toc
+            sections={[...writeup.sections, { id: "scenarios", title: walkthroughsTitle }, { id: "references", title: referencesTitle }]}
+          />
+        }>
         <Explainer simHref={base} />
         <ScenarioWalkthroughs
           title={walkthroughsTitle}
@@ -66,6 +72,7 @@ async function Content({ params }: { params: PageProps<"/[topic]/[sim]/how-it-wo
           scenarios={writeup.scenarios}
           walkthroughs={writeup.walkthroughs}
         />
+        <References title={referencesTitle} sources={writeup.sources} />
       </WriteupGrid>
     </>
   );

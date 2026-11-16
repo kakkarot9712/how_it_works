@@ -17,5 +17,6 @@ export { Slider } from "./Slider";
 export { Stat, StatGrid } from "./Stat";
 export { Surface, surfaceClass, type SurfaceOptions } from "./Surface";
 export { Term } from "./Term";
+export { Tooltip } from "./Tooltip";
 export { Toggle } from "./Toggle";
 export { toneBadge, toneBorder, toneColor, toneFill, toneSurface, toneText, type Tone } from "./tone";

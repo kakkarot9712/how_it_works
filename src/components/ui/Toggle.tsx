@@ -35,7 +35,7 @@ export function Toggle({
         />
       </span>
       <span className="min-w-0">
-        <span className="block text-sm font-medium text-fg">{label}</span>
+        <span className="block text-sm font-medium text-fg">{gloss(label, { focusable: false })}</span>
         {help && <span className="mt-0.5 block text-note leading-snug text-fg-muted">{gloss(help)}</span>}
       </span>
     </label>

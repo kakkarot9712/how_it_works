@@ -44,12 +44,12 @@ Tailwind only generates classes it finds written out in full in the source. Neve
 | `Button` (`tone`: default, primary, danger, ghost) | Actions. `danger` for "break it" actions (CLIENT KILL, crash). |
 | `LinkButton` (`size`: md, lg) | A Next link that looks like a button (calls to action, "▶ Run it"). Server-safe. |
 | `buttonClass(tone, className, size)` | Button styling for anything else that must look like one. |
-| `Toggle` (`tone="danger"`) | On/off controls with a help line. Client. |
-| `Slider` | Numeric knob with value + unit. Client. |
+| `Toggle` (`tone="danger"`) | On/off controls with a help line. Label and help are glossed. Client. |
+| `Slider` | Numeric knob with value + unit. Label and help are glossed. Client. |
 | `Stat`, `StatGrid` (`cols` 2 or 3) | Labelled numbers. Give a `tone` only when the value is a problem or good news. |
 | `Section` | Titled block inside a side panel (inspector, drawer). |
-| `Pill` (`size` sm/md, `title`) | Status badge: "subscribed", "down", "live". With `title` it is a hint chip ("slow motion ⓘ"). |
-| `Tag` (`tone`, `mono`) | Square label: block changes ("− Output buffer limits"), concept tags. |
+| `Pill` (`size` sm/md, `tip`, `tipHeading`) | Status badge: "subscribed", "down", "live". With `tip` it is a hint chip ("slow motion ⓘ") that opens the shared `Tooltip`. |
+| `Tag` (`tone`, `mono`, `tip`, `tipFocusable`) | Square label: block changes ("− Output buffer limits"), concept tags. `tip` explains it in the shared `Tooltip` (`tipFocusable={false}` inside a clickable row). |
 | `Eyebrow` (`tone`, `size`, `as`) | The only way to write an uppercase label. `md` heads a block ("STATS", "SEE IT HAPPEN"); `sm` labels a value (stat names, node kinds). |
 | `Help` | The 13px muted explanation line under controls/stats. |
 | `Surface` / `surfaceClass()` (`level` panel/raised, `radius` sm/md/lg/xl, `elevated`, `interactive`, `tone`) | **Every bordered box**: cards, panels, figures, tables, callouts, stats, popovers, tooltips, toolbars, chips. Use `surfaceClass()` on elements Surface can't render (a Next `<Link>`, a positioned popover). Padding and layout stay in `className`. |
@@ -59,12 +59,13 @@ Tailwind only generates classes it finds written out in full in the source. Neve
 | `IconButton` (`label`, `size` sm/md) | A glyph button (✕ − + ⏮). `label` is the tooltip and the accessible name. |
 | `SegmentedControl` (`options`, `value`, `onChange`, `format`, `label`) | One-of-few choice shown side by side (playback speed). A radio group; ←/→ when focused. |
 | `Kbd` | A key in a hint: `<Kbd>↵</Kbd> load`. |
+| `Tooltip` (`tip`, `heading`, `as`, `focusable`) | The one explanatory tooltip: hover, focus, tap; portalled. `Term`, `Pill tip` and `Tag tip` are built on it. Use it directly only for a custom trigger. |
 | `Term` | An acronym with a hover/focus/tap tooltip from the glossary. Rarely used directly; see below. |
 | `gloss(node, opts)`, `Glossed` | Wrap glossary acronyms found in text or an element tree with `Term`s. |
 
 ## Acronyms: the glossary
 
-Acronyms get hover tooltips from `src/lib/glossary.ts`. Most text components already run their text through `gloss()`. For custom markup, wrap it in `<Glossed>`; inside a button or link, use `{ focusable: false }`; in SVG, use `<title>{glossaryTitle(term)}</title>`. Adding terms, writing definitions and auditing are covered by the **`glossary`** skill.
+Acronyms get hover tooltips from `src/lib/glossary.ts`. Most text components already run their text through `gloss()`. For custom markup, wrap it in `<Glossed>`; inside a button or link, use `{ focusable: false }`; in SVG `<text>` (canvas nodes, `*Diagram.tsx`), put `<title>{glossaryTitle(term)}</title>` (or `glossaryTitles(text)`) inside it, since SVG can't hold `Term`; the glossary audit fails SVG text that shows a term without one. Plurals ("PELs") match automatically. Adding terms, writing definitions and auditing are covered by the **`glossary`** skill.
 
 ## canvas/: SVG building blocks for a sim's diagram
 
@@ -72,12 +73,17 @@ Sizes assume a ~1160-unit-wide viewBox. SVG text uses only the `text-svg-*` scal
 
 | Component | Use |
 | --- | --- |
-| `NodeBox` | Any clickable node: box + selected highlight + click-to-select (stops propagation so the canvas doesn't deselect). `surface="panel-2"` for nodes nested in a `Boundary`; `alert` for a red outline (crashed); `dim` for closed/inactive. Draw the node's contents as children. |
-| `Packet` | A message in flight between two points over `sentAt..arriveAt`. Labels ≤ ~10 chars (gaps between cards are < 100 units; use wire forms like `:2`, `RST`). |
+| `NodeBox` | Any clickable node: box + selected highlight + click-to-select (stops propagation so the canvas doesn't deselect). Always pass `id` (the node id `select` uses) so the scenario flow spotlight can halo or dim it. `surface="panel-2"` for nodes nested in a `Boundary`; `alert` for a red outline (crashed); `dim` for closed/inactive. Draw the node's contents as children. |
+| `Packet` | A message in flight between two points over `sentAt..arriveAt`. Pass `ends={[p.from, p.to]}` for the spotlight. Its width is `packetWidth(label)`; every pill must fit the gap it crosses with `LANE_MARGIN` each side (see Lanes below). Labels ≤ ~10 chars (gaps between cards are < 100 units; use wire forms like `:2`, `RST`). |
 | `Bar` | Fill bar with limit `markers` (soft/hard lines). `value` and markers are 0..1. `track="panel-2"` on `panel` surfaces. |
 | `Boundary` | Dashed region (a process, a host, a rack) with a label. `alert` when that process is down. |
-| `Wire` | Connection. `curve` for fan-out S-curves, `broken` for a cut link (dashed red + ✕), `faded` for inactive. |
+| `Wire` | Connection. Prefer straight horizontal wires: size and place cards so both ends share a y (e.g. a tall server card spanning every row it feeds). `curve` (S-curve) only when the ends can't line up and the gap is wide enough (≳ 80 units) for the curve to read as one, `broken` for a cut link (dashed red + ✕), `faded` for inactive. `ends={[a, b]}`: lit when both nodes are in the flow step. |
+| `FocusProvider`, `useFocus(ids)`, `UNFOCUSED_OPACITY` | The scenario-flow spotlight (`scenario-flow` skill). The Player provides it; kit components read it. A sim never dims or haloes by hand. |
 | `rows(n, top, bottom)` | Evenly spaced row centres for N nodes. |
+
+**Lanes:** the open gap between two cards that packets cross must be at least `packetWidth(widest label) + 2 × LANE_MARGIN` (~130 units for 10-character labels like `XREADGROUP`). Each sim exports `LANE_GAP: Record<packet kind, gap>` from `canvas/layout.ts`, computed from its boxes; `src/sims/lanes.test.ts` runs every scenario and fails if any real label is too wide for its lane. Widen a gap by narrowing cards (reflow their text), not by widening the viewBox (that shrinks all text). Keep pill labels to the command or ID; full commands belong on the card.
+
+**Lane offsets:** a packet never rides on its wire. Put its lane at `±PACKET_LANE` from the wire (half a pill + a highlighted wire's half-width + clear space), and a second lane on the same side at `±PACKET_LANE_2`. Don't hard-code offsets like `- 13`.
 
 **Drawing order:** boundary, then wires, then **packets**, then nodes. Packets go under the cards so a pill slides out of one card and into the next, never covering text.
 
@@ -114,6 +120,8 @@ The page shell (`app/(sim)/[topic]/[sim]/how-it-works/page.tsx`) uses `WriteupHe
 | `Compare` | Comparison table (this vs alternatives). |
 | `TryIt` | "See it happen" links from a paragraph into the scenarios that show it. |
 | `Rich` | Renders `` `code` `` and `**bold**` in short data strings (walkthroughs). |
+| `citer(sources)` → `cite("id", …)`, `Cite` | Inline Wikipedia-style `[n]` citation after a sentence, linking to the References list. Ids must exist in the sim's `sources.ts` (see `source-facts`). |
+| `References` | End-of-page numbered source list plus "Modelled on <version>". Rendered by the page shell, not by a sim. Each entry is `id="ref-<id>"` and highlights via `:target` when a `[n]` is clicked or a `#ref-…` link is opened. |
 
 Writing the content: see the `write-explainer` skill.
 
@@ -128,13 +136,14 @@ Shared by every sim. You rarely change it, and a sim never forks it.
 | File | Role |
 | --- | --- |
 | `Player.tsx` | Composes everything below; owns selection, drawer and copy-link state. |
-| `useSimulation.ts` | Scenario, overrides, Runtime, play/pause/speed loop, seek/step/dispatch. |
+| `useSimulation.ts` | Scenario, overrides, Runtime, play/pause/speed loop, seek/step/dispatch. Reads `?s=`/`?t=` via `useSearchParams()` and follows changes while mounted: `cacheComponents` keeps visited routes alive, so `useState` initializers alone would ignore a new query. |
 | `useShortcuts.ts` | Global keys (Space, `.`, ←/→, `[`/`]`). Ignores typing in fields. |
-| `url.ts` | Deep links `?s=<scenario>&t=<ms>`: read, write, build. |
-| `ScenarioBar.tsx`, `ScenarioPicker.tsx` | Scenario switcher, summary, watch-for list. |
+| `url.ts` | Deep links `?s=<scenario>&t=<ms>`: `parseSimQuery` (pure), `writeScenarioUrl`, `momentUrl`. Never read `window.location` for the query. |
+| `ScenarioBar.tsx`, `ScenarioPicker.tsx`, `ScenarioInfo.tsx` | One header row: scenario switcher, ⓘ popover with the summary and watch-for list, toolbar. Don't add text rows above the canvas: it needs the height. |
+| `FlowBar.tsx` | The Watch strip: the scenario's flow steps (click to jump), the current note, the Spotlight switch (key `F`), ✕ to hide (key `H`, remembered in localStorage; hiding pauses the spotlight). |
 | `BlocksDrawer.tsx` | Lego blocks + settings. |
 | `LogFeed.tsx` | Narration ("What just happened"). |
-| `Timeline.tsx`, `ZoomPan.tsx` | Scrubber/speed; zoom and pan for any canvas. |
+| `Timeline.tsx`, `ZoomPan.tsx` | Scrubber/speed, spanning exactly the scenario's `duration` (never grows; Play → Replay at the end); zoom and pan for any canvas. |
 
 A key a menu or input handles itself must `e.stopPropagation()`, or the player's global shortcuts fire too (Space would toggle play).
 

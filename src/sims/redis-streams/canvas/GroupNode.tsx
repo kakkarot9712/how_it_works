@@ -1,8 +1,9 @@
 import { NodeBox } from "@/components/canvas";
 import { toneFill } from "@/components/ui";
-import { lag, pendingOf, type Group, type State } from "../model";
+import { groupNode, lag, pendingOf, type Group, type State } from "../model";
 import { GROUP_COLOR, groupLagText, pendingTone } from "../theme";
 import { GROUPS } from "./layout";
+import { glossaryTitle } from "@/lib/glossary";
 
 const ROW = 21;
 
@@ -22,7 +23,7 @@ export function GroupNode({
 }) {
   const { x, y, w, h } = GROUPS[g.id];
   const l = lag(s, g);
-  const tx = x + 262;
+  const tx = x + 200;
   const maxRows = Math.floor((h - 74 - 50) / ROW) + 1;
   const rows = g.pel.slice(0, g.pel.length > maxRows ? maxRows - 1 : maxRows);
   const more = g.pel.length - rows.length;
@@ -34,7 +35,7 @@ export function GroupNode({
   ].filter(Boolean);
 
   return (
-    <NodeBox x={x} y={y} w={w} h={h} surface="panel-2" rx={10} selected={selected} dim={!s.server.up} onSelect={onSelect}>
+    <NodeBox id={groupNode(g.id)} x={x} y={y} w={w} h={h} surface="panel-2" rx={10} selected={selected} dim={!s.server.up} onSelect={onSelect}>
       <circle cx={x + 22} cy={y + 22} r={5.5} fill={GROUP_COLOR[g.id]} />
       <text x={x + 34} y={y + 28} className="fill-fg-muted text-svg-body">
         group <tspan className="fill-fg font-mono text-svg-title font-semibold">{g.name}</tspan>
@@ -59,7 +60,7 @@ export function GroupNode({
       {g.consumers.map((cid, i) => (
         <text key={cid} x={x + 16} y={y + 176 + i * 21} className="fill-fg font-mono text-svg-body">
           {s.consumers[cid].label}
-          <tspan x={x + 200} textAnchor="end" className={pendingOf(g, cid) ? "fill-warn" : "fill-fg-muted"}>
+          <tspan x={x + 168} textAnchor="end" className={pendingOf(g, cid) ? "fill-warn" : "fill-fg-muted"}>
             {pendingOf(g, cid)}
           </tspan>
         </text>
@@ -68,6 +69,7 @@ export function GroupNode({
       {/* PEL, like XPENDING orders <group> - + 10 */}
       <line x1={tx - 16} x2={tx - 16} y1={y + 14} y2={y + h - 14} className="stroke-line" />
       <text x={tx} y={y + 28} className="fill-fg-muted text-svg-caption uppercase tracking-wider">
+        <title>{glossaryTitle("PEL")}</title>
         {s.components.ack ? `PEL · ${g.pel.length} pending` : "PEL · NOACK, nothing tracked"}
       </text>
       <g className="fill-fg-muted text-svg-caption">

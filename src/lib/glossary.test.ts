@@ -2,7 +2,7 @@ import { createElement, isValidElement, type ReactElement, type ReactNode } from
 import { describe, expect, it } from "vitest";
 import { gloss } from "@/components/ui/gloss";
 import { Term } from "@/components/ui/Term";
-import { GLOSSARY, GLOSSARY_RE } from "./glossary";
+import { GLOSSARY, GLOSSARY_RE, glossaryTitles } from "./glossary";
 
 /** Terms gloss() wrapped, in order, anywhere in the tree. */
 function terms(node: ReactNode): string[] {
@@ -23,6 +23,16 @@ describe("glossary", () => {
 
   it("matches whole words only, longest first", () => {
     expect("RESP2 vs RESP, TCP's window, FINE, GCP".match(GLOSSARY_RE)).toEqual(["RESP2", "RESP", "TCP"]);
+  });
+
+  it("matches plurals (PELs, ACKs) but not longer words", () => {
+    expect(terms(gloss("their PELs and ACKs, not PELICAN"))).toEqual(["PEL", "ACK"]);
+  });
+
+  it("builds SVG tooltip text for every term in a label", () => {
+    expect(glossaryTitles("pending (PEL) over TCP")).toContain("PEL (Pending Entries List)");
+    expect(glossaryTitles("pending (PEL) over TCP")).toContain("TCP (Transmission Control Protocol)");
+    expect(glossaryTitles("no acronyms here")).toBeUndefined();
   });
 
   it("wraps acronyms in text and nested elements, but not code", () => {

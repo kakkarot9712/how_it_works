@@ -26,7 +26,7 @@ export function Slider({
   return (
     <label className="block py-1.5">
       <span className="flex items-baseline justify-between text-sm">
-        <span className="font-medium text-fg">{label}</span>
+        <span className="font-medium text-fg">{gloss(label, { focusable: false })}</span>
         <span className="font-mono text-fg-muted">
           {value}
           {unit}

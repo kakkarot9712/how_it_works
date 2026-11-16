@@ -3,13 +3,12 @@
  * The write-up, "Link to moment" and verify-simulation screenshots all rely on this format.
  */
 
-export function readSimUrl(scenarioIds: string[]): { scenarioId: string; t: number } {
-  const q = new URLSearchParams(window.location.search);
-  const id = q.get("s");
-  const t = Number(q.get("t"));
+/** Parse `?s=` and `?t=`. Unknown scenarios fall back to the first; bad times to 0. */
+export function parseSimQuery(scenarioIds: string[], s: string | null, t: string | null): { scenarioId: string; t: number } {
+  const ms = Number(t);
   return {
-    scenarioId: id && scenarioIds.includes(id) ? id : scenarioIds[0],
-    t: Number.isFinite(t) && t > 0 ? t : 0,
+    scenarioId: s && scenarioIds.includes(s) ? s : scenarioIds[0],
+    t: Number.isFinite(ms) && ms > 0 ? ms : 0,
   };
 }
 

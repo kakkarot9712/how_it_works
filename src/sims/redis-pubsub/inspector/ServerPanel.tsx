@@ -34,8 +34,8 @@ export function ServerPanel({ s, dispatch }: { s: State; dispatch: (a: Action) =
       <Section title="Under the hood">
         <Glossed>
           <ul className="list-disc space-y-1 pl-4 text-note leading-snug text-fg-muted">
-          <li>One thread runs the event loop. PUBLISH walks the channel&apos;s subscriber list, then every pattern.</li>
-          <li>A subscribed connection (RESP2) may only send SUBSCRIBE, UNSUBSCRIBE, PSUBSCRIBE, PUNSUBSCRIBE, PING, RESET and QUIT.</li>
+          <li>PUBLISH looks up the channel&apos;s subscribers first, then checks every pattern, and replies with the number of receivers.</li>
+          <li>A subscribed RESP2 connection may only send (P|S)SUBSCRIBE, (P|S)UNSUBSCRIBE, PING, RESET and QUIT. With RESP3 it can send any command.</li>
           <li>Delivery is at-most-once: no acks, no retries, no storage.</li>
         </ul>
         </Glossed>
