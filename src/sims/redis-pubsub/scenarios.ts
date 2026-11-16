@@ -61,7 +61,7 @@ export const scenarios: Scenario<Action, Settings, Components>[] = [
     script: [
       { at: 0, action: { type: "set-interval", pub: "P1", ms: 550 } },
       { at: 2000, action: { type: "set-blocked", sub: "S1", on: true } },
-      { at: 16000, action: { type: "set-blocked", sub: "S1", on: false } },
+      { at: 25000, action: { type: "set-blocked", sub: "S1", on: false } },
     ],
     select: "S1",
   },

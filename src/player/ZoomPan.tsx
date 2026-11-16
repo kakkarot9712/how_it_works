@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { cx } from "@/components/ui";
+import { cx, IconButton, Kbd, surfaceClass } from "@/components/ui";
 
 const MIN = 0.5;
 const MAX = 4;
@@ -114,41 +114,27 @@ export function ZoomPan({ children }: { children: ReactNode }) {
       </div>
 
       <div
-        className="absolute left-3 top-3 flex items-center gap-0.5 rounded-lg border border-line bg-panel/95 p-1 shadow-lg"
+        className={surfaceClass({ elevated: true }, "absolute left-3 top-3 flex items-center gap-0.5 p-1")}
         onPointerDown={(e) => e.stopPropagation()}
       >
-        <ZoomButton label="Zoom out (-)" onClick={() => zoomCenter(0.8)}>
+        <IconButton size="sm" label="Zoom out (-)" onClick={() => zoomCenter(0.8)}>
           −
-        </ZoomButton>
+        </IconButton>
         <button
           type="button"
           title="Fit to screen (0)"
           onClick={() => setView(FIT)}
-          className="w-14 rounded px-1 py-1 text-center font-mono text-xs text-fg-muted hover:bg-panel-2 hover:text-fg"
+          className="w-14 rounded-md px-1 py-1 text-center font-mono text-xs text-fg-muted transition-colors hover:bg-panel-2 hover:text-fg"
         >
           {Math.round(view.k * 100)}%
         </button>
-        <ZoomButton label="Zoom in (+)" onClick={() => zoomCenter(1.25)}>
+        <IconButton size="sm" label="Zoom in (+)" onClick={() => zoomCenter(1.25)}>
           +
-        </ZoomButton>
+        </IconButton>
       </div>
-      <div className="pointer-events-none absolute left-3 top-[54px] max-w-[200px] text-xs leading-snug text-fg-muted/70">
-        scroll to zoom · drag to pan · 0 to fit
+      <div className="pointer-events-none absolute left-3 top-[54px] whitespace-nowrap text-xs leading-snug text-fg-muted/70">
+        scroll to zoom · drag to pan · <Kbd>0</Kbd> to fit
       </div>
     </div>
-  );
-}
-
-function ZoomButton({ children, label, onClick }: { children: ReactNode; label: string; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      title={label}
-      aria-label={label}
-      onClick={onClick}
-      className="h-7 w-7 rounded text-base leading-none text-fg hover:bg-panel-2"
-    >
-      {children}
-    </button>
   );
 }

@@ -273,7 +273,8 @@ function onPublishArrive(s: State, ctx: Ctx, msg: Msg, packetId: number) {
   dropPacket(s, packetId);
   const pub = s.publishers[msg.publisher];
   if (!s.server.up) {
-    const reply = sendPacket(s, ctx, { kind: "reply", from: SERVER, to: pub.id, label: "ECONNREFUSED", error: true });
+    // Nothing listens on the port, so the kernel answers with a TCP RST: the client sees ECONNREFUSED.
+    const reply = sendPacket(s, ctx, { kind: "reply", from: SERVER, to: pub.id, label: "RST", error: true });
     ctx.schedule(reply.arriveAt - ctx.now, {
       type: "reply-arrive",
       pub: pub.id,
@@ -310,7 +311,8 @@ function onPublishArrive(s: State, ctx: Ctx, msg: Msg, packetId: number) {
     }
   }
 
-  const reply = sendPacket(s, ctx, { kind: "reply", from: SERVER, to: pub.id, label: `(integer) ${receivers}` });
+  // Pill shows the RESP wire form (":2\r\n"); the card shows it as redis-cli prints it.
+  const reply = sendPacket(s, ctx, { kind: "reply", from: SERVER, to: pub.id, label: `:${receivers}` });
   ctx.schedule(reply.arriveAt - ctx.now, {
     type: "reply-arrive",
     pub: pub.id,

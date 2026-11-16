@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getSim, topics } from "@/catalog";
-import { SimNav } from "@/components/SimNav";
+import { SimNav } from "@/components/site";
 import { SimMount } from "@/sims/registry";
 
 export function generateStaticParams() {

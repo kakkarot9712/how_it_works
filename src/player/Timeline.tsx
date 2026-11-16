@@ -2,11 +2,11 @@
 
 import { useRef } from "react";
 import type { LogEntry } from "@/engine/types";
-import { Button, cx } from "@/components/ui";
+import { Button, cx, IconButton, Pill, SegmentedControl } from "@/components/ui";
+import { secs } from "@/lib/format";
 
-export const fmt = (ms: number) => `${(ms / 1000).toFixed(1)}s`;
 
-const SPEEDS = [0.25, 0.5, 1, 2, 4];
+const SPEEDS = [0.25, 0.5, 1, 2, 4] as const;
 
 export function Timeline({
   now,
@@ -53,9 +53,9 @@ export function Timeline({
   return (
     <div className="flex items-center gap-3 border-t border-line bg-panel px-4 py-2.5">
       <div className="flex items-center gap-1">
-        <Button tone="ghost" onClick={onRestart} title="Restart from 0s">
+        <IconButton label="Restart from 0s" onClick={onRestart}>
           ⏮
-        </Button>
+        </IconButton>
         <Button tone="primary" onClick={onPlay} title="Play / pause (Space)" className="w-24 whitespace-nowrap">
           {playing ? "❚❚ Pause" : "▶ Play"}
         </Button>
@@ -64,7 +64,7 @@ export function Timeline({
         </Button>
       </div>
 
-      <div className="w-16 text-right font-mono text-sm text-fg">{fmt(now)}</div>
+      <div className="w-16 text-right font-mono text-sm text-fg">{secs(now)}</div>
 
       <div
         ref={track}
@@ -81,14 +81,14 @@ export function Timeline({
         <div className="absolute left-0 top-3.5 h-1 rounded bg-fg-muted/30" style={{ width: pct(horizon) }} />
         <div className="absolute left-0 top-3.5 h-1 rounded bg-accent" style={{ width: pct(now) }} />
         {ticks.map((t) => (
-          <div key={t} className="absolute top-6 -translate-x-1/2 font-mono text-[11px] text-fg-muted" style={{ left: pct(t) }}>
+          <div key={t} className="absolute top-6 -translate-x-1/2 font-mono text-2xs text-fg-muted" style={{ left: pct(t) }}>
             {t / 1000}s
           </div>
         ))}
         {markers.map((m, i) => (
           <div
             key={i}
-            title={`${fmt(m.t)} ${m.text}`}
+            title={`${secs(m.t)} ${m.text}`}
             className={cx("absolute top-1 h-2 w-0.5 -translate-x-1/2 rounded", m.level === "error" ? "bg-err" : "bg-warn")}
             style={{ left: pct(m.t) }}
           />
@@ -99,29 +99,8 @@ export function Timeline({
         />
       </div>
 
-      <div className="flex items-center gap-0.5 rounded-md border border-line bg-panel-2 p-0.5">
-        {SPEEDS.map((s) => (
-          <button
-            key={s}
-            type="button"
-            onClick={() => onSpeed(s)}
-            className={cx(
-              "rounded px-2 py-1 font-mono text-xs",
-              s === speed ? "bg-accent/20 text-accent" : "text-fg-muted hover:text-fg",
-            )}
-          >
-            {s}×
-          </button>
-        ))}
-      </div>
-      {note && (
-        <span
-          title={note}
-          className="cursor-help whitespace-nowrap rounded-md border border-line px-2 py-1 text-xs text-fg-muted"
-        >
-          slow motion ⓘ
-        </span>
-      )}
+      <SegmentedControl label="Playback speed" options={SPEEDS} value={speed} onChange={onSpeed} format={(s) => `${s}×`} />
+      {note && <Pill title={note}>slow motion ⓘ</Pill>}
     </div>
   );
 }

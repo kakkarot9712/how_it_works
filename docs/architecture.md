@@ -55,7 +55,7 @@ A sim exports a `SimDefinition`:
 | `Inspector` | per-node controls and stats, same props |
 | `timeNote` | slow-motion disclosure under the canvas |
 
-The **Player** (`src/player/Player.tsx`) is shared and fills its parent's height:
+The **Player** (`src/player/`) is shared and fills its parent's height. `Player.tsx` composes `useSimulation` (scenario, overrides, Runtime, animation loop), `useShortcuts`, `ScenarioBar`/`ScenarioPicker`, `BlocksDrawer`, `LogFeed`, `Timeline` and `ZoomPan`; `url.ts` owns the deep-link format:
 
 - header: scenario picker (dropdown + prev/next), summary, "watch for" bullets, "Blocks & settings" drawer toggle, "Link to moment"
 - canvas wrapped in **ZoomPan** (`src/player/ZoomPan.tsx`): wheel/pinch zooms around the cursor (50–400%), drag pans, `+`/`-`/`0` keys, on-screen controls. It uses a CSS transform on a wrapper, so sims need no zoom code. A drag never triggers a node click.
@@ -68,14 +68,32 @@ The **Player** (`src/player/Player.tsx`) is shared and fills its parent's height
 ## Routing and rendering
 
 - Route groups: `(site)` (home, topic pages) renders `SiteHeader`; `(sim)` renders no site header, so the simulator can use the full viewport. Its pages start with `SimNav` (logo, breadcrumb, Simulator / How it works tabs).
-- `/[topic]/[sim]` is the simulator only (`h-dvh`). `/[topic]/[sim]/how-it-works` is the server-rendered write-up (`writeups[id].Explainer`) followed by links into each scenario (`?s=<id>`).
+- `/[topic]/[sim]` is the simulator only (`h-dvh`). `/[topic]/[sim]/how-it-works` is the server-rendered write-up: a header from `writeups[id]` (title, lede, key facts, link to the simulator), a sticky contents list built from `sections` (`Toc`, wide screens only), the sim's `Explainer`, then a step-by-step walkthrough of every scenario (`walkthroughs.ts`, rendered by `ScenarioWalkthrough`), where each moment links to `?s=<id>&t=<ms>`. `walkthroughs.test.ts` keeps their times and claims in sync with the model's narration. The page shell uses `WriteupHero`, `WriteupGrid` + `Toc` and `ScenarioWalkthroughs`; a sim's Explainer composes `Prose`, `WriteupSection`, `Figure`, `Callout`, `AnnotatedConfig`, `Compare` and `TryIt` (all from `src/components/writeup/`).
 - `src/catalog.ts` lists topics and sims (`live` or `planned`). It drives `/`, `/[topic]` and `generateStaticParams`.
 - A live sim must be registered in `src/sims/registry.tsx` (client, `next/dynamic` with `ssr: false`, one chunk per sim) and in `src/sims/explainers.tsx` (`writeups`).
 - `cacheComponents` is on: the `dynamicParams` segment config is not allowed, and pages read `params` inside `<Suspense>` (instant-navigation rule). Because that streams a 200 before `notFound()` runs, `src/proxy.ts` checks the catalog first and returns a real 404 for unknown topic/sim paths. Update the proxy if you add new route shapes.
 
+## Components
+
+UI is built from shared kits in `src/components/` (details and conventions in the `ui-components` skill):
+
+- `ui/`: primitives (Button, LinkButton, Toggle, Slider, Stat/StatGrid, Section, Pill, Tag, Eyebrow, Help) and the **tone** tables (`ok`/`warn`/`err`/`accent`/`muted` → text, badge, border, SVG fill, CSS colour). State colours always go through a tone.
+- `canvas/`: SVG building blocks for sim diagrams: NodeBox, Packet, Bar, Boundary, Wire, `rows()`.
+- `inspector/`: InspectorHeader, InspectorEmpty, ConfigLine.
+- `writeup/`: everything on `/how-it-works`.
+- `site/`: Logo, SiteHeader, SimNav, SimCard, SimGrid.
+
+A sim keeps its own UI in `canvas/` (one file per node type), `inspector/` (one panel per node type) and `writeup/`, plus `theme.ts` for its traffic colours and status helpers.
+
 ## Visual language
 
-Dark console theme. Tokens are in `src/app/globals.css`: `bg`, `panel`, `panel-2`, `line`, `fg`, `fg-muted`, `accent`, `ok`, `warn`, `err`, `ch-1..ch-4` (kinds of traffic, e.g. one per channel or topic). The canvas uses SVG user units (Redis Pub/Sub: 1160×760). Keep body text ≥ 13 units and titles ~18–19 so the default fit is legible at 1280×800. Keep UI overlays (zoom controls) in the canvas's top-left, which layouts should leave empty.
+Dark console theme, defined as design tokens in `src/app/globals.css` and documented in the `design-system` skill:
+
+- **Colour roles:** surfaces `bg` → `panel` → `panel-2`, plus `line`, `fg`, `fg-muted`. `accent` means interactive or selected; `ok`/`warn`/`err` are state, always used through the tone tables; `ch-1..ch-4` are kinds of traffic.
+- **Type:** two scales. HTML: `2xs` 11, `xs` 12, `note` 13, `sm` 14, `body` 15, `base` 16, then headings. SVG, in viewBox units: `svg-caption` 12.5, `svg-body` 13.5, `svg-strong` 15.5, `svg-title` 19, `svg-display` 22.
+- **Everything else:** radius by role, two elevations (`shadow-popover`, `shadow-drawer`), five z-layers, one global `:focus-visible` ring, and the `scrollbar-thin` utility.
+
+`.claude/skills/design-system/audit.mjs` flags anything off-scale. The canvas uses SVG user units (Redis Pub/Sub: 1160×760) and must be legible at fit on 1280×800. Keep UI overlays (zoom controls) in the canvas's top-left, which layouts should leave empty.
 
 ## Planned engine additions
 

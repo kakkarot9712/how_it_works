@@ -1,21 +1,26 @@
 @import "tailwindcss";
 
 /*
- * Design tokens. The site is dark-only for now (console look).
- * Channel colors (ch-1..ch-4) are reused by every simulation for "kinds of
- * traffic" so the visual language stays consistent across technologies.
+ * Design tokens: the single source of truth for colour, type, elevation and layout
+ * rhythm. The `design-system` skill documents what each one is for; its audit script
+ * flags values used outside these scales. Dark-only for now (console look).
  */
 @theme {
-  --color-bg: #0b0d10;
-  --color-panel: #12151a;
-  --color-panel-2: #181c22;
-  --color-line: #262c35;
-  --color-fg: #e6e9ee;
-  --color-fg-muted: #8b94a3;
+  /* ── Surfaces and text (darkest → lightest) ── */
+  --color-bg: #0b0d10; /* page background, canvas, insets (bars, code) */
+  --color-panel: #12151a; /* panels, cards, primary canvas nodes */
+  --color-panel-2: #181c22; /* raised: controls, nested nodes, stats, popovers */
+  --color-line: #262c35; /* borders, dividers, wires, empty tracks */
+  --color-fg: #e6e9ee; /* primary text, values */
+  --color-fg-muted: #8b94a3; /* secondary text, labels, help */
+
+  /* ── Roles. accent = interactive/selected/brand; ok/warn/err = state ── */
   --color-accent: #5eead4;
   --color-ok: #4ade80;
   --color-warn: #fbbf24;
   --color-err: #fb7185;
+
+  /* ── Kinds of traffic (one per channel / topic / partition), shared by every sim ── */
   --color-ch-1: #60a5fa;
   --color-ch-2: #c084fc;
   --color-ch-3: #fb923c;
@@ -23,7 +28,38 @@
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /*
+   * ── Type scale (HTML). Tailwind's own xs (12) · sm (14) · base (16) · lg · 2xl · 3xl · 4xl,
+   * plus three steps it lacks. These inherit line-height, like the arbitrary sizes they replace.
+   */
+  --text-2xs: 0.6875rem; /* 11px: stat labels, node kinds, tags, kbd hints */
+  --text-note: 0.8125rem; /* 13px: help lines, narration detail, secondary panel text */
+  --text-body: 0.9375rem; /* 15px: write-up secondary body (walkthroughs, TryIt, configs) */
+
+  /*
+   * ── Type scale (SVG canvases and diagrams), in viewBox user units. Sized for a
+   * ~1160-unit canvas at fit zoom (AGENTS.md rule 9). Use these, never text-[Npx], in SVG.
+   */
+  --text-svg-caption: 12.5px; /* uppercase section labels inside a node, footnotes */
+  --text-svg-body: 13.5px; /* labels, values, status lines, packet pills */
+  --text-svg-strong: 15.5px; /* key values that must read first (channel names, ✕) */
+  --text-svg-title: 19px; /* node titles */
+  --text-svg-display: 22px; /* full-node overlays ("PROCESS DOWN") */
+
+  /* ── Line height for long-form reading ── */
+  --leading-prose: 1.8;
+
+  /* ── Elevation: only things that float above the page get a shadow ── */
+  --shadow-popover: 0 16px 40px -8px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(0 0 0 / 0.2); /* menus, tooltips, floating toolbars */
+  --shadow-drawer: 12px 0 40px -12px rgb(0 0 0 / 0.6); /* slide-over panels */
 }
+
+/*
+ * Stacking layers (z-index). Use only these:
+ *   z-10 sticky page chrome (SiteHeader, SimNav)  ·  z-20 drawers over the canvas
+ *   z-30 click-away backdrop of a menu  ·  z-40 menus/popovers  ·  z-50 tooltips
+ */
 
 :root {
   color-scheme: dark;
@@ -37,4 +73,16 @@ body {
 
 ::selection {
   background: color-mix(in oklab, var(--color-accent) 35%, transparent);
+}
+
+/* One visible focus style for every keyboard-focusable element. Components don't restyle it. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Thin, theme-coloured scrollbar for scrolling panels and menus. */
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
 }

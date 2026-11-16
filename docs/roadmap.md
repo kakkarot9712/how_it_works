@@ -12,7 +12,7 @@
 
 | # | Sim | Status | Key mechanics |
 | --- | --- | --- | --- |
-| 1 | Engine + player + **Redis Pub/Sub** | done | output buffers, soft/hard limits, TCP window, half-open, reconnect, OOM, restart |
+| 1 | Engine + player + **Redis Pub/Sub** | done | output buffers, soft/hard limits, TCP window, half-open, reconnect, OOM, restart. Write-up with a message-path diagram and tested step-by-step walkthroughs of all 8 scenarios; shared component kits, design system and acronym glossary |
 | 2 | Redis Streams + compare with Pub/Sub | next | XADD, consumer groups, PEL, XACK, XAUTOCLAIM, MAXLEN trimming |
 | 3 | Kafka produce & replicate | planned | partitioner, leader/follower fetch (pull), ISR, high watermark, acks, min.insync.replicas, unclean election |
 | 4 | Kafka consumer groups | planned | pull + lag, offset commits, rebalances, at-least/at-most once, poison messages |

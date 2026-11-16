@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { cx } from "@/lib/cx";
-import { Logo } from "./SiteHeader";
+import { Logo } from "./Logo";
 import type { SimEntry, Topic } from "@/catalog";
+import { Heading } from "@/components/ui";
 
 /** Top bar for a sim's two pages (simulator, write-up): logo, breadcrumb, tabs. */
 export function SimNav({ topic, sim, active }: { topic: Topic; sim: SimEntry; active: "simulator" | "how-it-works" }) {
@@ -26,7 +27,9 @@ export function SimNav({ topic, sim, active }: { topic: Topic; sim: SimEntry; ac
           {topic.name}
         </Link>
         <span className="text-fg-muted">/</span>
-        <h1 className="font-semibold text-fg">{sim.title}</h1>
+        <Heading level="item" as="h1">
+          {sim.title}
+        </Heading>
       </div>
       <nav className="flex h-full items-center gap-5">
         {tab(base, "Simulator", active === "simulator")}

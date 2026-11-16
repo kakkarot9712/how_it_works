@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getSim, topics } from "@/catalog";
-import { SimNav } from "@/components/SimNav";
+import { SimNav } from "@/components/site";
+import { LinkButton } from "@/components/ui";
+import { ScenarioWalkthroughs, Toc, WriteupGrid, WriteupHero } from "@/components/writeup";
 import { writeups } from "@/sims/explainers";
 
 export function generateStaticParams() {
@@ -36,33 +37,36 @@ async function Content({ params }: { params: PageProps<"/[topic]/[sim]/how-it-wo
   const base = `/${topic}/${sim}`;
   const { Explainer } = writeup;
 
+  const walkthroughsTitle = "Every scenario, step by step";
+
   return (
     <>
       <SimNav topic={found.topic} sim={found.sim} active="how-it-works" />
-      <Explainer />
-      <section className="mx-auto max-w-3xl px-6 pb-24">
-        <h2 className="mb-4 text-2xl font-semibold text-fg">See it happen</h2>
-        <p className="mb-5 text-[15px] leading-7 text-fg-muted">
-          Each scenario opens the simulator with one situation set up. Once it&apos;s running, you can take control.
-        </p>
-        <ol className="space-y-2">
-          {writeup.scenarios.map((s, i) => (
-            <li key={s.id}>
-              <Link
-                href={`${base}?s=${s.id}`}
-                className="block rounded-lg border border-line bg-panel px-4 py-3 transition-colors hover:border-accent/60"
-              >
-                <div className="flex gap-3 text-base text-fg">
-                  <span className="font-mono text-sm leading-6 text-fg-muted">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="font-medium">{s.title}</span>
-                  <span className="ml-auto text-sm leading-6 text-accent">open →</span>
-                </div>
-                <p className="mt-1 pl-8 text-sm leading-relaxed text-fg-muted">{s.summary}</p>
-              </Link>
-            </li>
-          ))}
-        </ol>
-      </section>
+      <WriteupHero
+        eyebrow={`${found.topic.name} · ${found.sim.title} · how it works`}
+        title={writeup.title}
+        lede={writeup.lede}
+        facts={writeup.facts}
+        actions={
+          <>
+            <LinkButton href={base} size="lg">
+              ▶ Open the simulator
+            </LinkButton>
+            <a href="#scenarios" className="px-2 py-2 text-sm text-fg-muted transition-colors hover:text-fg">
+              {writeup.scenarios.length} scenarios ↓
+            </a>
+          </>
+        }
+      />
+      <WriteupGrid className="py-14" rail={<Toc sections={[...writeup.sections, { id: "scenarios", title: walkthroughsTitle }]} />}>
+        <Explainer simHref={base} />
+        <ScenarioWalkthroughs
+          title={walkthroughsTitle}
+          simHref={base}
+          scenarios={writeup.scenarios}
+          walkthroughs={writeup.walkthroughs}
+        />
+      </WriteupGrid>
     </>
   );
 }

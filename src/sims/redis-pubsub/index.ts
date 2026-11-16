@@ -1,6 +1,6 @@
 import type { SimDefinition } from "@/sims/types";
-import { Canvas } from "./Canvas";
-import { Inspector } from "./Inspector";
+import { Canvas } from "./canvas/Canvas";
+import { Inspector } from "./inspector/Inspector";
 import { defaultComponents, defaultSettings, model, type Action, type Components, type Event, type Settings, type State } from "./model";
 import { scenarios } from "./scenarios";
 

@@ -1,27 +1,25 @@
 import Link from "next/link";
 import { topics } from "@/catalog";
-import { SimCard } from "@/components/SimCard";
+import { SimGrid } from "@/components/site";
+import { Container, Eyebrow, Heading, LinkButton } from "@/components/ui";
 
 export default function Home() {
   return (
-    <main className="mx-auto w-full max-w-6xl px-6 pb-24">
+    <Container as="main" className="pb-24">
       <section className="py-20">
         <p className="font-mono text-xs text-accent">$ syswork --explain</p>
-        <h1 className="mt-3 max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-fg">
+        <Heading level="display" as="h1" className="mt-3 max-w-3xl leading-tight">
           See how systems actually work. Then break them.
-        </h1>
+        </Heading>
         <p className="mt-4 max-w-2xl text-base leading-relaxed text-fg-muted">
           Animated simulations of real system internals: message brokers, load balancers, replication, transactions.
           Stall a consumer, cut a network link, crash a node, or pull a component out entirely. Then watch, step by step,
           what the system does and why.
         </p>
         <div className="mt-8 flex gap-3">
-          <Link
-            href="/redis/pub-sub"
-            className="rounded-md border border-accent/50 bg-accent/15 px-4 py-2 text-sm font-medium text-accent hover:bg-accent/25"
-          >
+          <LinkButton href="/redis/pub-sub" size="lg">
             Start with Redis Pub/Sub →
-          </Link>
+          </LinkButton>
         </div>
       </section>
 
@@ -29,22 +27,20 @@ export default function Home() {
         {topics.map((t) => (
           <div key={t.slug}>
             <div className="mb-4 flex items-baseline gap-3">
-              <h2 className="text-lg font-semibold text-fg">
-                <Link href={`/${t.slug}`} className="hover:text-accent">
+              <Heading level="card">
+                <Link href={`/${t.slug}`} className="transition-colors hover:text-accent">
                   {t.name}
                 </Link>
-              </h2>
+              </Heading>
               <span className="text-xs text-fg-muted">{t.tagline}</span>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-fg-muted/70">{t.kind}</span>
+              <Eyebrow as="span" size="sm" className="font-mono">
+                {t.kind}
+              </Eyebrow>
             </div>
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {t.sims.map((s) => (
-                <SimCard key={s.slug} topic={t} sim={s} />
-              ))}
-            </div>
+            <SimGrid topic={t} />
           </div>
         ))}
       </section>
-    </main>
+    </Container>
   );
 }
