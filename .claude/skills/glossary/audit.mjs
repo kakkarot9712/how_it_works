@@ -18,6 +18,10 @@ const NOT_ACRONYMS = new Set([
   "PUBLISH", "SUBSCRIBE", "PSUBSCRIBE", "UNSUBSCRIBE", "PUNSUBSCRIBE", "SSUBSCRIBE", "SPUBLISH", "SUNSUBSCRIBE",
   "PING", "RESET", "QUIT", "CLIENT", "KILL", "HELLO", "XADD", "XREAD", "XREADGROUP", "XACK", "XCLAIM",
   "BLOCK", // XREAD/XREADGROUP option
+  // Redis Streams commands, subcommands and options
+  "XAUTOCLAIM", "XPENDING", "XGROUP", "XINFO", "XLEN", "XTRIM", "XDEL", "XRANGE", "XACKDEL", "XDELEX", "XNACK",
+  "CREATE", "GROUP", "GROUPS", "STREAMS", "COUNT", "NOACK", "CLAIM", "MKSTREAM", "MAXLEN", "MINID", "JUSTID",
+  "KEEPREF", "DELREF", "ACKED",
   // Units and plain words in caps
   "KB", "MB", "GB", "ASAP", "DOWN", "PROCESS", "OK", "ID",
   // UI / code words that end up in strings (class names, keys, element names)

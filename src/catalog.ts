@@ -41,8 +41,9 @@ export const topics: Topic[] = [
       {
         slug: "streams",
         title: "Streams & consumer groups",
-        summary: "An append-only log with consumer groups, the pending entries list (PEL), XACK and XCLAIM. The fix for everything Pub/Sub loses.",
-        status: "planned",
+        summary:
+          "An append-only log with consumer groups. Kill, hang or poison a consumer and watch the pending entries list (PEL), XACK, XAUTOCLAIM, dead-lettering and MAXLEN trimming.",
+        status: "live",
         concepts: ["log", "at-least-once", "consumer groups"],
       },
     ],

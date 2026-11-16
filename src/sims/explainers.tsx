@@ -2,6 +2,9 @@ import type { ComponentType } from "react";
 import { Explainer as RedisPubSub, meta as redisPubSubMeta } from "./redis-pubsub/writeup/Explainer";
 import { scenarios as redisPubSubScenarios } from "./redis-pubsub/scenarios";
 import { walkthroughs as redisPubSubWalkthroughs } from "./redis-pubsub/walkthroughs";
+import { Explainer as RedisStreams, meta as redisStreamsMeta } from "./redis-streams/writeup/Explainer";
+import { scenarios as redisStreamsScenarios } from "./redis-streams/scenarios";
+import { walkthroughs as redisStreamsWalkthroughs } from "./redis-streams/walkthroughs";
 
 /** Header and navigation data for a write-up, exported by the sim's Explainer.tsx. */
 export interface WriteupMeta {
@@ -38,4 +41,5 @@ export interface Writeup extends WriteupMeta {
 
 export const writeups: Record<string, Writeup> = {
   "redis/pub-sub": { ...redisPubSubMeta, Explainer: RedisPubSub, scenarios: redisPubSubScenarios, walkthroughs: redisPubSubWalkthroughs },
+  "redis/streams": { ...redisStreamsMeta, Explainer: RedisStreams, scenarios: redisStreamsScenarios, walkthroughs: redisStreamsWalkthroughs },
 };

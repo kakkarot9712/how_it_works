@@ -22,6 +22,14 @@ const sims: Record<string, ComponentType> = {
       }),
     { ssr: false, loading },
   ),
+  "redis/streams": dynamic(
+    () =>
+      import("./redis-streams").then((m) => {
+        const Sim = () => <Player def={m.redisStreams} />;
+        return Sim;
+      }),
+    { ssr: false, loading },
+  ),
 };
 
 export function SimMount({ id }: { id: string }) {

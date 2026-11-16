@@ -11,7 +11,7 @@ export function SimNav({ topic, sim, active }: { topic: Topic; sim: SimEntry; ac
     <Link
       href={href}
       className={cx(
-        "relative flex h-full items-center px-1 text-sm transition-colors",
+        "relative flex h-full items-center whitespace-nowrap px-1 text-sm transition-colors",
         on ? "text-fg after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-accent" : "text-fg-muted hover:text-fg",
       )}
     >
@@ -19,19 +19,19 @@ export function SimNav({ topic, sim, active }: { topic: Topic; sim: SimEntry; ac
     </Link>
   );
   return (
-    <div className="sticky top-0 z-10 flex h-12 shrink-0 items-center gap-6 border-b border-line bg-panel px-5">
+    <div className="sticky top-0 z-10 flex h-12 shrink-0 items-center gap-4 border-b border-line bg-panel px-4 sm:gap-6 sm:px-5">
       <Logo />
-      <span className="h-5 w-px bg-line" />
-      <div className="flex items-center gap-1.5 text-sm">
-        <Link href={`/${topic.slug}`} className="text-fg-muted hover:text-fg">
+      <span className="hidden h-5 w-px bg-line sm:block" />
+      <div className="flex min-w-0 items-center gap-1.5 text-sm">
+        <Link href={`/${topic.slug}`} className="hidden text-fg-muted hover:text-fg sm:inline">
           {topic.name}
         </Link>
-        <span className="text-fg-muted">/</span>
-        <Heading level="item" as="h1">
+        <span className="hidden text-fg-muted sm:inline">/</span>
+        <Heading level="item" as="h1" className="truncate">
           {sim.title}
         </Heading>
       </div>
-      <nav className="flex h-full items-center gap-5">
+      <nav className="flex h-full shrink-0 items-center gap-4 sm:gap-5">
         {tab(base, "Simulator", active === "simulator")}
         {tab(`${base}/how-it-works`, "How it works", active === "how-it-works")}
       </nav>
