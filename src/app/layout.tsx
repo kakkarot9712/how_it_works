@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://syswork.vikalpg.in"),
   title: { default: "syswork: how systems actually work", template: "%s · syswork" },
   description:
-    "Interactive, animated simulations of system internals: Redis, Kafka, load balancers, consensus, transactions. Break things and watch what happens.",
+    "Interactive, animated simulations of system internals: Redis, Kafka, load balancers, consensus. Break things and watch what happens.",
 };
 
 /**

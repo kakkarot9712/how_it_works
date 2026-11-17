@@ -8,6 +8,10 @@
 - Users must always have direct control in every sim (block a client, kill a broker, and so on).
 - Desktop is required now. Full mobile support is planned soon.
 
+## Owner decisions (2026-11-17)
+
+- Transactions are dropped from the plan. Isolation levels, MVCC and WAL behave differently in each database engine, so they aren't general knowledge in the way Redis Pub/Sub and Streams are. The PostgreSQL 18 isolation-levels sim that was already built (`src/sims/pg-isolation/`) stays in the repo but is unpublished: its topic has `hidden: true` in `src/catalog.ts`, so it isn't listed and its URLs return 404. Tests still cover it.
+
 ## Phases
 
 | # | Sim | Status | Key mechanics |
@@ -18,7 +22,6 @@
 | 4 | Kafka consumer groups | planned | pull + lag, offset commits, rebalances, at-least/at-most once, poison messages |
 | 5 | Load balancing | planned | RR, weighted, least-conn, P2C, consistent hashing ring and virtual nodes |
 | 6 | Raft (+ MongoDB replica set) | planned | terms, randomized timeouts, votes, log matching, commit index, partitions |
-| 7 | Transactions | planned | isolation anomalies on parallel timelines, MVCC versions, WAL + crash recovery |
 
 Cross-cutting, after phase 2: a comparison mode ("slow consumer" in Pub/Sub, Streams and Kafka side by side), concept pages (push vs pull, at-most/at-least-once), and the mobile layout.
 

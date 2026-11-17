@@ -20,10 +20,13 @@ export interface Topic {
   name: string;
   kind: "technology" | "concept";
   tagline: string;
+  /** Unreleased: left out of `topics`, so it is not listed and its URLs return 404. Tests still cover it. */
+  hidden?: boolean;
   sims: SimEntry[];
 }
 
-export const topics: Topic[] = [
+/** Every topic, including hidden ones. Only tests should need this; pages use `topics`. */
+export const allTopics: Topic[] = [
   {
     slug: "redis",
     name: "Redis",
@@ -118,13 +121,15 @@ export const topics: Topic[] = [
     slug: "transactions",
     name: "Transactions",
     kind: "concept",
+    hidden: true,
     tagline: "ACID, isolation levels, MVCC",
     sims: [
       {
         slug: "isolation-levels",
         title: "Isolation levels & anomalies",
-        summary: "Two transactions on parallel timelines: dirty reads, non-repeatable reads, lost updates and write skew at each isolation level.",
-        status: "planned",
+        summary:
+          "Two PostgreSQL sessions on parallel timelines: row versions and snapshots, non-repeatable reads, phantoms, lost updates, write skew, serialization failures and deadlocks at each isolation level.",
+        status: "live",
         concepts: ["ACID", "MVCC", "isolation"],
       },
       {
@@ -137,6 +142,9 @@ export const topics: Topic[] = [
     ],
   },
 ];
+
+/** Published topics: what the site lists, routes and prerenders. */
+export const topics = allTopics.filter((t) => !t.hidden);
 
 export function getTopic(slug: string): Topic | undefined {
   return topics.find((t) => t.slug === slug);

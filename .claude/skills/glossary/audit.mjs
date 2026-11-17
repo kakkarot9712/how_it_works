@@ -23,6 +23,10 @@ const NOT_ACRONYMS = new Set([
   "CREATE", "GROUP", "GROUPS", "STREAMS", "COUNT", "NOACK", "CLAIM", "MKSTREAM", "MAXLEN", "MINID", "JUSTID",
   "KEEPREF", "DELREF", "ACKED", "BUSYGROUP", "ENTRIESREAD", "LIMIT", "MAXCOUNT", "MAXSIZE", "NOMKSTREAM", "SETID",
   "FAQ", // plain English in a page title ("Redis FAQ")
+  // SQL keywords and PostgreSQL message severities (shown in code style; documented by PostgreSQL itself)
+  "BEGIN", "COMMIT", "ROLLBACK", "TRANSACTION", "WORK", "ISOLATION", "LEVEL", "READ", "COMMITTED", "UNCOMMITTED", "REPEATABLE",
+  "SERIALIZABLE", "ONLY", "DEFERRABLE", "UPDATE", "INSERT", "INTO", "VALUES", "DEFAULT", "DELETE", "MERGE", "FROM", "WHERE",
+  "SET", "FOR", "NO", "KEY", "SHARE", "LOCK", "TABLE", "FETCH", "COPY", "VACUUM", "ERROR", "FATAL", "WARNING", "HINT", "DETAIL",
   // Units and plain words in caps
   "KB", "MB", "GB", "ASAP", "DOWN", "PROCESS", "OK", "ID",
   // UI / code words that end up in strings (class names, keys, element names)

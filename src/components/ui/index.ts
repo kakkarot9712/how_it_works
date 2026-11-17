@@ -1,6 +1,7 @@
 /** UI primitives. Import from "@/components/ui". */
 export { cx } from "@/lib/cx";
 export { Button, buttonClass, type ButtonTone } from "./Button";
+export { Choice } from "./Choice";
 export { Container } from "./Container";
 export { Eyebrow } from "./Eyebrow";
 export { gloss, Glossed, type GlossOptions } from "./gloss";

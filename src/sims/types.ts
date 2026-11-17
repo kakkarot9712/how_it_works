@@ -59,6 +59,11 @@ export interface SettingDef<St> {
   step: number;
   unit?: string;
   help: string;
+  /**
+   * One-of-few setting: labels for the values min, min + step, … max (e.g. isolation levels).
+   * The drawer shows a choice instead of a slider; the value stays a number.
+   */
+  choices?: string[];
 }
 
 /** A removable building block (the "lego" sandbox). Toggling rebuilds the sim. */

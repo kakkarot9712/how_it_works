@@ -8,7 +8,7 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { getSim, topics } from "@/catalog";
+import { allTopics } from "@/catalog";
 import { GLOSSARY } from "@/lib/glossary";
 import type { SourceRule, SourceSet } from "@/lib/sources";
 import { writeups } from "./explainers";
@@ -68,7 +68,7 @@ const ISO = /^\d{4}-\d{2}-\d{2}$/;
 
 describe("sources: every module cites reliable sources for what it says", () => {
   it("every live sim has a write-up with a source set", () => {
-    for (const t of topics)
+    for (const t of allTopics)
       for (const s of t.sims.filter((x) => x.status === "live")) {
         const w = writeups[`${t.slug}/${s.slug}`];
         expect(w?.sources, `${t.slug}/${s.slug}: add sources.ts and pass it to writeups[]`).toBeTruthy();
@@ -141,7 +141,7 @@ describe("sources: every module cites reliable sources for what it says", () => 
         const covered = new Set(sources.references.flatMap((r) => r.covers));
         const texts = files(join(SIMS, dir)).map((f) => readFileSync(f, "utf8"));
         const [topic, slug] = entry![0].split("/");
-        texts.push(JSON.stringify(getSim(topic, slug)?.sim.summary ?? ""));
+        texts.push(JSON.stringify(allTopics.find((t) => t.slug === topic)?.sims.find((x) => x.slug === slug)?.summary ?? ""));
         const missing = [...new Set(texts.flatMap((t) => [...termsIn(t)]))].filter((t) => !covered.has(t)).sort();
         expect(missing, "add the source that documents these to a reference's `covers` (after reading it), or remove them from the text").toEqual([]);
       });

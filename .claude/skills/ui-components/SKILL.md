@@ -57,7 +57,8 @@ Tailwind only generates classes it finds written out in full in the source. Neve
 | `Container` | Page width: `max-w-6xl`, centred, 24px gutter. |
 | `PanelHeader` (`actions`, `compact`, `divider`) | The header row of a panel, drawer or menu: content left, actions right. |
 | `IconButton` (`label`, `size` sm/md) | A glyph button (✕ − + ⏮). `label` is the tooltip and the accessible name. |
-| `SegmentedControl` (`options`, `value`, `onChange`, `format`, `label`) | One-of-few choice shown side by side (playback speed). A radio group; ←/→ when focused. |
+| `SegmentedControl` (`options`, `value`, `onChange`, `format`, `label`, `columns`) | One-of-few choice shown side by side (playback speed), or as a 2-column grid for long labels. A radio group; ←/→ when focused. |
+| `Choice` | A labelled one-of-few setting (label, choices, help). The drawer uses it for a `SettingDef` with `choices` (isolation level). |
 | `Kbd` | A key in a hint: `<Kbd>↵</Kbd> load`. |
 | `Tooltip` (`tip`, `heading`, `as`, `focusable`) | The one explanatory tooltip: hover, focus, tap; portalled. `Term`, `Pill tip` and `Tag tip` are built on it. Use it directly only for a custom trigger. |
 | `Term` | An acronym with a hover/focus/tap tooltip from the glossary. Rarely used directly; see below. |
@@ -117,6 +118,7 @@ The page shell (`app/(sim)/[topic]/[sim]/how-it-works/page.tsx`) uses `WriteupHe
 | `Figure` | A diagram (inline SVG) with a caption; scrolls sideways on phones. |
 | `Callout` (`tone` info/warn) | A key takeaway, a caveat, "What this simulation simplifies". |
 | `AnnotatedConfig` | A real config line with each argument labelled. |
+| `ServerOutput` | Verbatim output from the system (an error with its DETAIL and HINT, a log line) in a boxed monospace block. |
 | `Compare` | Comparison table (this vs alternatives). |
 | `TryIt` | "See it happen" links from a paragraph into the scenarios that show it. |
 | `Rich` | Renders `` `code` `` and `**bold**` in short data strings (walkthroughs). |

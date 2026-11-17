@@ -30,6 +30,14 @@ const sims: Record<string, ComponentType> = {
       }),
     { ssr: false, loading },
   ),
+  "transactions/isolation-levels": dynamic(
+    () =>
+      import("./pg-isolation").then((m) => {
+        const Sim = () => <Player def={m.pgIsolation} />;
+        return Sim;
+      }),
+    { ssr: false, loading },
+  ),
 };
 
 export function SimMount({ id }: { id: string }) {

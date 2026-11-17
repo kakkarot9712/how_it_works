@@ -12,7 +12,7 @@ export default function Home() {
           See how systems actually work. Then break them.
         </Heading>
         <p className="mt-4 max-w-2xl text-base leading-relaxed text-fg-muted">
-          Animated simulations of real system internals: message brokers, load balancers, replication, transactions.
+          Animated simulations of real system internals: message brokers, load balancers, replication.
           Stall a consumer, cut a network link, crash a node, or pull a component out entirely. Then watch, step by step,
           what the system does and why.
         </p>

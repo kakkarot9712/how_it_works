@@ -13,6 +13,7 @@ export function SegmentedControl<T extends string | number>({
   onChange,
   format = String,
   label,
+  columns,
 }: {
   options: readonly T[];
   value: T;
@@ -20,6 +21,8 @@ export function SegmentedControl<T extends string | number>({
   format?: (v: T) => string;
   /** Accessible name of the group. */
   label: string;
+  /** Lay the options out as a 2-column grid (long labels) instead of one row. */
+  columns?: 2;
 }) {
   const onKey = (e: KeyboardEvent) => {
     const i = options.indexOf(value);
@@ -30,7 +33,7 @@ export function SegmentedControl<T extends string | number>({
     onChange(next);
   };
   return (
-    <div role="radiogroup" aria-label={label} onKeyDown={onKey} className="flex items-center gap-0.5 rounded-md border border-line bg-panel-2 p-0.5">
+    <div role="radiogroup" aria-label={label} onKeyDown={onKey} className={cx("rounded-md border border-line bg-panel-2 p-0.5", columns === 2 ? "grid grid-cols-2 gap-0.5" : "flex items-center gap-0.5")}>
       {options.map((o) => (
         <button
           key={String(o)}

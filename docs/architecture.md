@@ -48,7 +48,7 @@ A sim exports a `SimDefinition`:
 | --- | --- |
 | `model` | the `SimModel` |
 | `defaults` | `{ settings, components }` |
-| `settings` | numeric knobs (slider defs). Changing one rebuilds the run |
+| `settings` | numeric knobs (slider defs, or a one-of-few `choices` list such as isolation levels). Changing one rebuilds the run |
 | `components` | removable lego blocks (boolean). Toggling rebuilds the run |
 | `scenarios` | curated runs: title, summary, `watchFor`, partial settings and components, `script` of timed actions, initial `select`, and `flow`: timed steps naming the nodes to follow, with a note each |
 | `nodeIds` | every node id the canvas draws, so tests can check flow steps |

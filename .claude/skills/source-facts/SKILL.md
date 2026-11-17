@@ -71,6 +71,7 @@ The test can't read meaning. It catches names without sources; it can't catch a 
 | Kafka | `https://kafka.apache.org/<version>/` (design, getting started, javadoc), KIPs on `cwiki.apache.org/confluence/display/KAFKA` |
 | TCP and other protocols | the RFC on `https://www.rfc-editor.org/rfc/` |
 | Linux | `https://man7.org/linux/man-pages/` (Linux man-pages project), kernel source in `github.com/torvalds/linux` |
+| PostgreSQL | `https://www.postgresql.org/docs/<major>/` (concurrency control is chapter 13, SQL commands under `sql-*.html`, settings under `runtime-config-*.html`), release support at `/support/versioning/`, exact messages in the source at `github.com/postgres/postgres` (branch `REL_<major>_STABLE`) |
 
 For a new subject (MongoDB, PostgreSQL, Raft…), use the project's own docs, the spec or the original paper, add the prefixes to that module's `officialSources`, and extend this table. If you can't tell whether a site is official, ask the owner.
 

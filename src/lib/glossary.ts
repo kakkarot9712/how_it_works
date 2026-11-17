@@ -85,6 +85,18 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     expansion: "Multi-Version Concurrency Control",
     brief: "Readers see a consistent snapshot while writers create new row versions, so reads and writes don't block each other.",
   },
+  SSI: {
+    expansion: "Serializable Snapshot Isolation",
+    brief: "How PostgreSQL's SERIALIZABLE works: snapshot isolation plus non-blocking tracking of who read what, cancelling a transaction when the result could not match any serial order.",
+  },
+  SQL: {
+    expansion: "Structured Query Language",
+    brief: "The language relational databases are queried in. The SQL standard defines the four transaction isolation levels used here.",
+  },
+  SQLSTATE: {
+    expansion: "SQL error code",
+    brief: "The five-character code PostgreSQL returns with every error, e.g. 40001 for a serialization failure and 40P01 for a deadlock. Apps decide whether to retry by it.",
+  },
   WAL: {
     expansion: "Write-Ahead Log",
     brief: "Changes are appended to a log on disk before they're applied, so a crash can be recovered by replaying the log.",

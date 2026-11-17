@@ -8,6 +8,10 @@ import { scenarios as redisStreamsScenarios } from "./redis-streams/scenarios";
 import { walkthroughs as redisStreamsWalkthroughs } from "./redis-streams/walkthroughs";
 import { sources as redisStreamsSources } from "./redis-streams/sources";
 import { sources as redisPubSubSources } from "./redis-pubsub/sources";
+import { Explainer as PgIsolation, meta as pgIsolationMeta } from "./pg-isolation/writeup/Explainer";
+import { scenarios as pgIsolationScenarios } from "./pg-isolation/scenarios";
+import { walkthroughs as pgIsolationWalkthroughs } from "./pg-isolation/walkthroughs";
+import { sources as pgIsolationSources } from "./pg-isolation/sources";
 
 /** Header and navigation data for a write-up, exported by the sim's Explainer.tsx. */
 export interface WriteupMeta {
@@ -47,4 +51,11 @@ export interface Writeup extends WriteupMeta {
 export const writeups: Record<string, Writeup> = {
   "redis/pub-sub": { ...redisPubSubMeta, Explainer: RedisPubSub, scenarios: redisPubSubScenarios, walkthroughs: redisPubSubWalkthroughs, sources: redisPubSubSources },
   "redis/streams": { ...redisStreamsMeta, Explainer: RedisStreams, scenarios: redisStreamsScenarios, walkthroughs: redisStreamsWalkthroughs, sources: redisStreamsSources },
+  "transactions/isolation-levels": {
+    ...pgIsolationMeta,
+    Explainer: PgIsolation,
+    scenarios: pgIsolationScenarios,
+    walkthroughs: pgIsolationWalkthroughs,
+    sources: pgIsolationSources,
+  },
 };

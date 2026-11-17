@@ -2,9 +2,9 @@
 
 See how systems actually work, then break them.
 
-Animated, interactive simulations of system internals: message brokers, load balancers, replication, transactions. Each simulation runs curated scenarios, and you can take control at any time: stall a consumer, cut a network link, crash a node, or remove a building block (like Redis's output buffer limits) and watch what happens, step by step, with narration explaining why.
+Animated, interactive simulations of system internals: message brokers, load balancers, replication. Each simulation runs curated scenarios, and you can take control at any time: stall a consumer, cut a network link, crash a node, or remove a building block (like Redis's output buffer limits) and watch what happens, step by step, with narration explaining why.
 
-**Live:** Redis Pub/Sub. **Next:** Redis Streams, Kafka, load balancing, Raft, isolation levels. See [docs/roadmap.md](docs/roadmap.md).
+**Live:** Redis Pub/Sub, Redis Streams. **Next:** Kafka, load balancing, Raft. See [docs/roadmap.md](docs/roadmap.md).
 
 ## Develop
 

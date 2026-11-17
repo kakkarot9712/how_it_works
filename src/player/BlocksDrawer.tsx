@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Heading, IconButton, PanelHeader, Section, Slider, Toggle } from "@/components/ui";
+import { Button, Choice, Heading, IconButton, PanelHeader, Section, Slider, Toggle } from "@/components/ui";
 import type { AnySimDefinition } from "@/sims/types";
 
 /**
@@ -59,7 +59,17 @@ export function BlocksDrawer({
         ))}
       </Section>
       <Section title="Settings">
-        {def.settings.map((d) => (
+        {def.settings.map((d) =>
+          d.choices ? (
+            <Choice
+              key={d.key}
+              label={d.label}
+              value={(settings[d.key] - d.min) / d.step}
+              options={d.choices}
+              help={d.help}
+              onChange={(i) => onSetting(d.key, d.min + i * d.step)}
+            />
+          ) : (
           <Slider
             key={d.key}
             label={d.label}
@@ -71,7 +81,8 @@ export function BlocksDrawer({
             help={d.help}
             onChange={(v) => onSetting(d.key, v)}
           />
-        ))}
+          ),
+        )}
       </Section>
     </aside>
   );
