@@ -29,6 +29,13 @@ describe("glossary", () => {
     expect(terms(gloss("their PELs and ACKs, not PELICAN"))).toEqual(["PEL", "ACK"]);
   });
 
+  it("matches phrases, also capitalized at a sentence start, as one term", () => {
+    expect(terms(gloss("High watermarks and the high watermark, not highwatermark"))).toEqual(["High watermark", "high watermark"]);
+    const seen = new Set<string>();
+    expect(terms(gloss("High watermark. Then the high watermark again.", { seen }))).toEqual(["High watermark"]);
+    expect(glossaryTitles("High watermark stuck at 4")).toMatch(/^high watermark: Kafka's commit point/);
+  });
+
   it("builds SVG tooltip text for every term in a label", () => {
     expect(glossaryTitles("pending (PEL) over TCP")).toContain("PEL (Pending Entries List)");
     expect(glossaryTitles("pending (PEL) over TCP")).toContain("TCP (Transmission Control Protocol)");

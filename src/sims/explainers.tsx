@@ -8,6 +8,14 @@ import { scenarios as redisStreamsScenarios } from "./redis-streams/scenarios";
 import { walkthroughs as redisStreamsWalkthroughs } from "./redis-streams/walkthroughs";
 import { sources as redisStreamsSources } from "./redis-streams/sources";
 import { sources as redisPubSubSources } from "./redis-pubsub/sources";
+import { Explainer as KafkaReplication, meta as kafkaReplicationMeta } from "./kafka-replication/writeup/Explainer";
+import { scenarios as kafkaReplicationScenarios } from "./kafka-replication/scenarios";
+import { walkthroughs as kafkaReplicationWalkthroughs } from "./kafka-replication/walkthroughs";
+import { sources as kafkaReplicationSources } from "./kafka-replication/sources";
+import { Explainer as LbAlgorithms, meta as lbAlgorithmsMeta } from "./lb-algorithms/writeup/Explainer";
+import { scenarios as lbAlgorithmsScenarios } from "./lb-algorithms/scenarios";
+import { walkthroughs as lbAlgorithmsWalkthroughs } from "./lb-algorithms/walkthroughs";
+import { sources as lbAlgorithmsSources } from "./lb-algorithms/sources";
 import { Explainer as PgIsolation, meta as pgIsolationMeta } from "./pg-isolation/writeup/Explainer";
 import { scenarios as pgIsolationScenarios } from "./pg-isolation/scenarios";
 import { walkthroughs as pgIsolationWalkthroughs } from "./pg-isolation/walkthroughs";
@@ -51,6 +59,20 @@ export interface Writeup extends WriteupMeta {
 export const writeups: Record<string, Writeup> = {
   "redis/pub-sub": { ...redisPubSubMeta, Explainer: RedisPubSub, scenarios: redisPubSubScenarios, walkthroughs: redisPubSubWalkthroughs, sources: redisPubSubSources },
   "redis/streams": { ...redisStreamsMeta, Explainer: RedisStreams, scenarios: redisStreamsScenarios, walkthroughs: redisStreamsWalkthroughs, sources: redisStreamsSources },
+  "kafka/produce-and-replicate": {
+    ...kafkaReplicationMeta,
+    Explainer: KafkaReplication,
+    scenarios: kafkaReplicationScenarios,
+    walkthroughs: kafkaReplicationWalkthroughs,
+    sources: kafkaReplicationSources,
+  },
+  "load-balancing/algorithms": {
+    ...lbAlgorithmsMeta,
+    Explainer: LbAlgorithms,
+    scenarios: lbAlgorithmsScenarios,
+    walkthroughs: lbAlgorithmsWalkthroughs,
+    sources: lbAlgorithmsSources,
+  },
   "transactions/isolation-levels": {
     ...pgIsolationMeta,
     Explainer: PgIsolation,

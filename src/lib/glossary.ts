@@ -27,6 +27,18 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     expansion: "Acknowledgement",
     brief: "Confirmation that data arrived. In TCP the receiver ACKs bytes; in messaging, a consumer acknowledges a message it has processed.",
   },
+  p50: {
+    expansion: "50th percentile, the median",
+    brief: "Half of the requests finished faster than this, half slower. It shows the typical request and hides the slow ones.",
+  },
+  p95: {
+    expansion: "95th percentile",
+    brief: "95 of every 100 requests finished at least this fast; the slowest 5 took longer. It shows the tail that a median or average hides.",
+  },
+  HTTP: {
+    expansion: "Hypertext Transfer Protocol",
+    brief: "The request/response protocol of the web: a client sends a request and gets back a response with a status code, such as 200 OK or 502 Bad Gateway.",
+  },
   ECONNREFUSED: {
     expansion: "Connection refused (OS error code)",
     brief: "What a client's connect() reports when the server host answers with RST, usually because the process isn't running.",
@@ -75,7 +87,26 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
   },
   ISR: {
     expansion: "In-Sync Replicas",
-    brief: "The Kafka replicas that are caught up with the partition leader. Only they can become leader without losing acknowledged writes.",
+    brief: "The Kafka replicas caught up with the partition leader. A write is committed once every one of them has it, and only they can be elected leader in a clean election.",
+  },
+  ELR: {
+    expansion: "Eligible Leader Replicas",
+    brief: "Kafka 4.x: replicas outside the ISR that still hold every committed record, so the controller may elect one when the ISR is empty.",
+  },
+  HW: {
+    expansion: "High watermark",
+    brief: "In Kafka, the offset up to which every in-sync replica has the partition's records. Records below it are committed; consumers only read below it.",
+  },
+  "high watermark": {
+    brief: "Kafka's commit point (HW): the smallest log end offset in the ISR. Records below it are committed and readable by consumers. It only moves while the ISR has at least min.insync.replicas members.",
+  },
+  LEO: {
+    expansion: "Log end offset",
+    brief: "The offset the next record appended to a Kafka replica's log will get: one past its last record.",
+  },
+  KIP: {
+    expansion: "Kafka Improvement Proposal",
+    brief: "A written proposal for a major change to Apache Kafka, discussed on the developer mailing list and voted on before it is adopted.",
   },
   ACID: {
     expansion: "Atomicity, Consistency, Isolation, Durability",
@@ -103,19 +134,34 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
   },
 };
 
+/**
+ * Phrases (lowercase keys like "high watermark") also match with a capital first
+ * letter at the start of a sentence; `glossaryKey` maps that back to the entry.
+ */
+const capitalize = (t: string) => t[0].toUpperCase() + t.slice(1);
+const VARIANTS = Object.keys(GLOSSARY).flatMap((t) => (/^[a-z]/.test(t) ? [t, capitalize(t)] : [t]));
+
+/** The GLOSSARY key for a matched term ("High watermark" -> "high watermark"), or undefined. */
+export function glossaryKey(term: string): string | undefined {
+  if (GLOSSARY[term]) return term;
+  const lower = term[0].toLowerCase() + term.slice(1);
+  return GLOSSARY[lower] ? lower : undefined;
+}
+
 /** Longest first, so RESP2 wins over RESP. */
-const TERMS = Object.keys(GLOSSARY).sort((a, b) => b.length - a.length);
+const TERMS = VARIANTS.sort((a, b) => b.length - a.length);
 /** Whole-word match, plus a plural "s" (PELs, ACKs): the "s" stays outside the captured term. */
 export const GLOSSARY_RE = new RegExp(`\\b(${TERMS.join("|")})(?=s?\\b)`, "g");
 
 /** Native tooltip text for every glossary term in `text` (for an SVG <title>), or undefined if it has none. */
 export function glossaryTitles(text: string): string | undefined {
-  const found = [...new Set([...text.matchAll(GLOSSARY_RE)].map((m) => m[1]))];
+  const found = [...new Set([...text.matchAll(GLOSSARY_RE)].map((m) => glossaryKey(m[1])!))];
   return found.length ? found.map((t) => glossaryTitle(t)).join("\n") : undefined;
 }
 
 /** One-line form for native tooltips (SVG <title>). */
 export function glossaryTitle(term: string): string | undefined {
-  const g = GLOSSARY[term];
-  return g && `${term}${g.expansion ? ` (${g.expansion})` : ""}: ${g.brief}`;
+  const key = glossaryKey(term);
+  const g = key && GLOSSARY[key];
+  return g && `${key}${g.expansion ? ` (${g.expansion})` : ""}: ${g.brief}`;
 }

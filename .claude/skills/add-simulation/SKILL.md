@@ -5,14 +5,16 @@ description: Build a new interactive simulation (a new technology or concept, e.
 
 # Add a simulation
 
-Read `docs/architecture.md` first. Use `src/sims/redis-pubsub/` as the reference implementation and mirror its file layout. Build all UI from the shared kits: read the `ui-components` skill before writing the canvas or inspector, and the `write-explainer` skill before writing the write-up.
+Read `docs/architecture.md` first. Start every file from **[templates.md](templates.md)** (skeletons of each file with the props the kits take and the rules the cross-sim tests enforce). You shouldn't need to read another sim end to end; if you find yourself doing that to learn a pattern, add the pattern to templates.md instead. Build all UI from the shared kits: read the `ui-components` skill before writing the canvas or inspector, and the `write-explainer` skill before writing the write-up.
+
+Per-technology facts live in fact skills (`kafka-facts`, …): sourced quotes, config defaults, error codes and log lines. Use them for research, and add what you learn to them (or create `<tech>-facts` for a new technology), so the next sim on that technology starts from verified facts.
 
 ## 0. Research before code
 
 A sim is only worth having if it's accurate. Before writing the model:
 
 1. List the real mechanisms to show: components, messages, state, config names and defaults, failure behaviors, log lines and error messages. Note every acronym you'll show (ISR, HW, LSN…): each needs a glossary entry (`glossary` skill).
-2. Check each one against official docs or source, following the **`source-facts`** skill (mandatory): pick the version to model, read each official page, and record it in `sources.ts`. Anything the docs don't clearly support is cut, not kept for later. If unsure, ask the owner. Note what you checked.
+2. Check each one against official docs or source, following the **`source-facts`** skill (mandatory). Look in the technology's `<tech>-facts` skill first; record anything new there too: pick the version to model, read each official page, and record it in `sources.ts`. Anything the docs don't clearly support is cut, not kept for later. If unsure, ask the owner. Note what you checked.
 3. Decide what to simplify (time scale, units, protocol detail). These go in the explainer's "What this simulation simplifies" section.
 4. Choose:
    - **Controls** per node (what the user can break or drive). Every node a user would want to poke needs at least one action.

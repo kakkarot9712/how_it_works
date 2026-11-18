@@ -133,7 +133,10 @@ export function ZoomPan({ children }: { children: ReactNode }) {
         </IconButton>
       </div>
       <div className="pointer-events-none absolute left-3 top-[54px] whitespace-nowrap text-xs leading-snug text-fg-muted/70">
-        scroll to zoom · drag to pan · <Kbd>0</Kbd> to fit
+        <div>scroll to zoom · drag to pan</div>
+        <div className="mt-0.5">
+          <Kbd>0</Kbd> to fit
+        </div>
       </div>
     </div>
   );

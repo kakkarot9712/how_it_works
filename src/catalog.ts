@@ -60,14 +60,15 @@ export const allTopics: Topic[] = [
       {
         slug: "produce-and-replicate",
         title: "Produce & replicate",
-        summary: "Partitioner, leader and followers pulling (fetching) from the leader, ISR, high watermark, acks=0/1/all, min.insync.replicas, leader failover.",
-        status: "planned",
+        summary:
+          "One partition on three brokers: followers pull with Fetch, the ISR and high watermark, acks=0/1/all, min.insync.replicas, leader failover and unclean election. Stall a follower, crash the leader, and count the acknowledged records that survive.",
+        status: "live",
         concepts: ["pull delivery", "replication", "durability"],
       },
       {
         slug: "consumer-groups",
         title: "Consumer groups",
-        summary: "Pull-based consumers, lag, offset commits and rebalancing.",
+        summary: "Keys and the partitioner, pull-based consumers, lag, offset commits and rebalancing.",
         status: "planned",
         concepts: ["pull delivery", "at-least-once", "backpressure"],
       },
@@ -77,13 +78,15 @@ export const allTopics: Topic[] = [
     slug: "load-balancing",
     name: "Load balancing",
     kind: "concept",
+    hidden: true,
     tagline: "Spreading requests across servers",
     sims: [
       {
         slug: "algorithms",
         title: "Algorithms side by side",
-        summary: "Round robin, weighted, least connections, power of two choices, under uneven servers and slow requests.",
-        status: "planned",
+        summary:
+          "Four nginx upstream groups on the same requests: round robin, random, least_conn and random two, with weights. Slow a server down, hang it or crash it and compare tail latency, retries and max_fails.",
+        status: "live",
         concepts: ["load balancing", "tail latency"],
       },
       {

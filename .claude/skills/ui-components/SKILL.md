@@ -145,7 +145,7 @@ Shared by every sim. You rarely change it, and a sim never forks it.
 | `FlowBar.tsx` | The Watch strip: the scenario's flow steps (click to jump), the current note, the Spotlight switch (key `F`), ✕ to hide (key `H`, remembered in localStorage; hiding pauses the spotlight). |
 | `BlocksDrawer.tsx` | Lego blocks + settings. |
 | `LogFeed.tsx` | Narration ("What just happened"). |
-| `Timeline.tsx`, `ZoomPan.tsx` | Scrubber/speed, spanning exactly the scenario's `duration` (never grows; Play → Replay at the end); zoom and pan for any canvas. |
+| `Timeline.tsx`, `ZoomPan.tsx` | Scrubber/speed, spanning exactly the scenario's `duration` (never grows; playback loops back to 0 at the end after a short hold); zoom and pan for any canvas. |
 
 A key a menu or input handles itself must `e.stopPropagation()`, or the player's global shortcuts fire too (Space would toggle play).
 

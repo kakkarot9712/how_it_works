@@ -1,6 +1,6 @@
 "use client";
 
-import { GLOSSARY } from "@/lib/glossary";
+import { GLOSSARY, glossaryKey } from "@/lib/glossary";
 import { Tooltip } from "./Tooltip";
 
 /**
@@ -9,7 +9,8 @@ import { Tooltip } from "./Tooltip";
  * Usually you don't use this directly: pass text through `gloss()` / `<Glossed>`.
  */
 export function Term({ term, children, focusable = true }: { term: string; children?: string; focusable?: boolean }) {
-  const entry = GLOSSARY[term];
+  const key = glossaryKey(term);
+  const entry = key && GLOSSARY[key];
   if (!entry) return <>{children ?? term}</>;
   return (
     <Tooltip
@@ -17,7 +18,7 @@ export function Term({ term, children, focusable = true }: { term: string; child
       focusable={focusable}
       heading={
         <>
-          <span className="font-mono font-semibold">{term}</span>
+          <span className={/^[a-z]/.test(key) ? "font-semibold" : "font-mono font-semibold"}>{key}</span>
           {entry.expansion && <> · {entry.expansion}</>}
         </>
       }

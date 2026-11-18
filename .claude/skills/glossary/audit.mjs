@@ -27,6 +27,10 @@ const NOT_ACRONYMS = new Set([
   "BEGIN", "COMMIT", "ROLLBACK", "TRANSACTION", "WORK", "ISOLATION", "LEVEL", "READ", "COMMITTED", "UNCOMMITTED", "REPEATABLE",
   "SERIALIZABLE", "ONLY", "DEFERRABLE", "UPDATE", "INSERT", "INTO", "VALUES", "DEFAULT", "DELETE", "MERGE", "FROM", "WHERE",
   "SET", "FOR", "NO", "KEY", "SHARE", "LOCK", "TABLE", "FETCH", "COPY", "VACUUM", "ERROR", "FATAL", "WARNING", "HINT", "DETAIL",
+  // The Kafka wiki's space key in cwiki.apache.org/confluence/display/KAFKA/ URLs (sources.ts)
+  "KAFKA",
+  // HTTP request methods (shown in code style; documented by nginx's proxy_next_upstream)
+  "POST", "PATCH",
   // Units and plain words in caps
   "KB", "MB", "GB", "ASAP", "DOWN", "PROCESS", "OK", "ID",
   // UI / code words that end up in strings (class names, keys, element names)

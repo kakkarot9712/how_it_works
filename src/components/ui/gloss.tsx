@@ -1,5 +1,5 @@
 import { cloneElement, Fragment, isValidElement, type ReactNode } from "react";
-import { GLOSSARY_RE } from "@/lib/glossary";
+import { GLOSSARY_RE, glossaryKey } from "@/lib/glossary";
 import { Term } from "./Term";
 
 /** Elements whose text is left alone: code is literal, and links/buttons can't hold a focusable term. */
@@ -33,8 +33,10 @@ function glossText(text: string, { seen, focusable = true }: GlossOptions): Reac
   if (parts.length === 1) return text;
   // split() with a capture group puts matches at odd indices.
   return parts.map((p, i) => {
-    if (i % 2 === 0 || (seen && seen.has(p))) return p;
-    seen?.add(p);
+    if (i % 2 === 0) return p;
+    const key = glossaryKey(p) ?? p; // "High watermark" and "high watermark" are one term for `seen`
+    if (seen?.has(key)) return p;
+    seen?.add(key);
     return <Term key={i} term={p} focusable={focusable} />;
   });
 }

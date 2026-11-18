@@ -24,7 +24,8 @@ Every acronym a reader sees has a hover, focus or tap tooltip with what it stand
    - `expansion`: what the letters stand for ("TCP finish flag", "Out Of Memory"). For an error code, name what it is ("Connection refused (OS error code)").
    - `brief`: 1–2 plain sentences, under ~200 characters (the test enforces 20–220). Say what it means *as it shows up on this site*. For example, RST: "Aborts a connection at once. A host also replies with RST to a connection attempt on a port nobody is listening on." Not a textbook definition, no jargon that itself needs a tooltip, no marketing.
    - Versions or variants that appear as their own token (RESP2 vs RESP) get their own entries. The matcher prefers the longer one.
-4. Keep `GLOSSARY` grouped roughly by topic (transport, Redis, OS, databases). There's no need to sort it.
+4. **Spelled-out domain terms** that readers meet as a phrase (e.g. `"high watermark"` next to its acronym `HW`) can be entries too: key them in lowercase, no `expansion`. The matcher also catches the capitalized form at a sentence start, and `glossaryKey()` maps it back. Use this sparingly, only for core terms of a sim that appear in prose without their acronym.
+5. Keep `GLOSSARY` grouped roughly by topic (transport, Redis, OS, databases). There's no need to sort it.
 
 ## 2. Make new text show tooltips
 

@@ -1,0 +1,136 @@
+import type { SourceSet } from "@/lib/sources";
+
+/**
+ * Every claim in this module (model narration, canvas, inspector, scenarios, walkthroughs,
+ * write-up) must be supported by one of these. Ordered by first citation in the Explainer.
+ * The quotes behind each are collected in the `kafka-facts` skill.
+ */
+export const sources: SourceSet = {
+  subject: "Apache Kafka",
+  version: "4.4",
+  label: "Kafka 4.4",
+  versionNote:
+    "Replication behaviour, config names and defaults are from the Kafka 4.4 documentation; the high watermark, ISR and election rules follow the 4.4.0 source. Behaviour that changed in the 4.x line is marked with its version: Eligible Leader Replicas (4.0+, on by default for new clusters from 4.1) and linger.ms=5 (4.0+).",
+  checked: "2026-11-18",
+  officialSources: ["https://kafka.apache.org/", "https://github.com/apache/kafka/", "https://cwiki.apache.org/confluence/display/KAFKA/"],
+  references: [
+    {
+      id: "design",
+      title: "Design: the producer, the consumer, replication, unclean leader election, availability and durability",
+      publisher: "Apache Kafka 4.4 documentation",
+      url: "https://kafka.apache.org/44/design/design/",
+      accessed: "2026-11-18",
+      covers: ["acks", "min.insync.replicas", "replica.lag.time.max.ms", "broker.session.timeout.ms", "unclean.leader.election.enable", "Fetch"],
+    },
+    {
+      id: "protocol",
+      title: "Kafka protocol guide: Fetch and Produce APIs, error codes",
+      publisher: "Apache Kafka 4.4 documentation",
+      url: "https://kafka.apache.org/44/design/protocol/",
+      accessed: "2026-11-18",
+      covers: [
+        "fetch_offset", "high_watermark", "max_wait_ms", "min_bytes", "replica_id", "current_leader_epoch", "last_fetched_epoch", "base_offset",
+        "NOT_ENOUGH_REPLICAS", "NOT_ENOUGH_REPLICAS_AFTER_APPEND", "NOT_LEADER_OR_FOLLOWER", "REQUEST_TIMED_OUT", "Produce", "Fetch",
+      ],
+    },
+    {
+      id: "partition-scala",
+      title: "core/src/main/scala/kafka/cluster/Partition.scala (4.4.0)",
+      publisher: "Apache Kafka source repository",
+      url: "https://github.com/apache/kafka/blob/4.4.0/core/src/main/scala/kafka/cluster/Partition.scala",
+      accessed: "2026-11-18",
+      covers: ["maybeIncrementLeaderHW", "updateFollowerFetchState", "maybeShrinkIsr", "NotEnoughReplicasException", "AlterPartition", "Shrinking ISR from", "ISR updated to", "under-min-isr"],
+    },
+    {
+      id: "broker-configs",
+      title: "Broker configs",
+      publisher: "Apache Kafka 4.4 documentation",
+      url: "https://kafka.apache.org/44/configuration/broker-configs/",
+      accessed: "2026-11-18",
+      covers: ["replica.lag.time.max.ms", "replica.fetch.wait.max.ms", "replica.fetch.min.bytes", "broker.session.timeout.ms", "broker.heartbeat.interval.ms"],
+    },
+    {
+      id: "producer-configs",
+      title: "Producer configs",
+      publisher: "Apache Kafka 4.4 documentation",
+      url: "https://kafka.apache.org/44/configuration/producer-configs/",
+      accessed: "2026-11-18",
+      covers: [
+        "acks", "enable.idempotence", "retries", "delivery.timeout.ms", "request.timeout.ms", "retry.backoff.ms", "max.in.flight.requests.per.connection",
+        "linger.ms", "batch.size",
+      ],
+    },
+    {
+      id: "topic-configs",
+      title: "Topic configs",
+      publisher: "Apache Kafka 4.4 documentation",
+      url: "https://kafka.apache.org/44/configuration/topic-configs/",
+      accessed: "2026-11-18",
+      covers: ["min.insync.replicas", "unclean.leader.election.enable", "NotEnoughReplicas", "NotEnoughReplicasAfterAppend"],
+    },
+    {
+      id: "kip-966",
+      title: "KIP-966: Eligible Leader Replicas",
+      publisher: "Apache Kafka wiki (Kafka Improvement Proposals)",
+      url: "https://cwiki.apache.org/confluence/display/KAFKA/KIP-966%3A+Eligible+Leader+Replicas",
+      accessed: "2026-11-18",
+      covers: ["min.insync.replicas"],
+    },
+    {
+      id: "rcm-java",
+      title: "metadata/src/main/java/org/apache/kafka/controller/ReplicationControlManager.java (4.4.0)",
+      publisher: "Apache Kafka source repository",
+      url: "https://github.com/apache/kafka/blob/4.4.0/metadata/src/main/java/org/apache/kafka/controller/ReplicationControlManager.java",
+      accessed: "2026-11-18",
+      covers: ["Fencing broker", "because its session has timed out", "generateLeaderAndIsrUpdates"],
+    },
+    {
+      id: "pcb-java",
+      title: "metadata/src/main/java/org/apache/kafka/controller/PartitionChangeBuilder.java (4.4.0)",
+      publisher: "Apache Kafka source repository",
+      url: "https://github.com/apache/kafka/blob/4.4.0/metadata/src/main/java/org/apache/kafka/controller/PartitionChangeBuilder.java",
+      accessed: "2026-11-18",
+      covers: ["electAnyLeader", "using an unclean election"],
+    },
+    {
+      id: "elr",
+      title: "Eligible Leader Replicas",
+      publisher: "Apache Kafka 4.4 documentation",
+      url: "https://kafka.apache.org/44/operations/eligible-leader-replicas/",
+      accessed: "2026-11-18",
+      covers: ["eligible.leader.replicas.version", "min.insync.replicas"],
+    },
+    {
+      id: "kip-101",
+      title: "KIP-101: Alter Replication Protocol to use Leader Epoch rather than High Watermark for Truncation",
+      publisher: "Apache Kafka wiki (Kafka Improvement Proposals)",
+      url: "https://cwiki.apache.org/confluence/display/KAFKA/KIP-101+-+Alter+Replication+Protocol+to+use+Leader+Epoch+rather+than+High+Watermark+for+Truncation",
+      accessed: "2026-11-18",
+      covers: [],
+    },
+    {
+      id: "leader-election-cmd",
+      title: "tools/src/main/java/org/apache/kafka/tools/LeaderElectionCommand.java (4.4.0)",
+      publisher: "Apache Kafka source repository",
+      url: "https://github.com/apache/kafka/blob/4.4.0/tools/src/main/java/org/apache/kafka/tools/LeaderElectionCommand.java",
+      accessed: "2026-11-18",
+      covers: ["kafka-leader-election", "kafka-leader-election.sh", "election-type", "bootstrap-server", "unclean", "preferred"],
+    },
+    {
+      id: "intro",
+      title: "Introduction",
+      publisher: "Apache Kafka 4.4 documentation",
+      url: "https://kafka.apache.org/44/getting-started/introduction/",
+      accessed: "2026-11-18",
+      covers: [],
+    },
+    {
+      id: "downloads",
+      title: "Download: 4.4.0, released October 22, 2026",
+      publisher: "Apache Kafka",
+      url: "https://kafka.apache.org/community/downloads/",
+      accessed: "2026-11-18",
+      covers: [],
+    },
+  ],
+};

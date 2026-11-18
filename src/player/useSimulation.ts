@@ -7,6 +7,8 @@ import { DEFAULT_DURATION_MS, type AnySimDefinition } from "@/sims/types";
 import { parseSimQuery, writeScenarioUrl } from "./url";
 
 const SEED = 42;
+/** How long (real ms) the last frame stays on screen before playback loops back to 0. */
+const END_HOLD_MS = 1500;
 
 /**
  * Owns a sim's run: the current scenario, the user's block/setting overrides, the
@@ -62,16 +64,25 @@ export function useSimulation(def: AnySimDefinition) {
     return r;
   }, [def, scenario, settingsOv, componentsOv, startAt]);
 
-  // Animation loop: advance simulated time by real elapsed time × speed.
+  // Animation loop: advance simulated time by real elapsed time × speed. At the end of the
+  // run it holds the last frame for END_HOLD_MS (real time), then loops back to 0 and keeps playing.
   useEffect(() => {
     if (!playing) return;
     let raf = 0;
     let last = performance.now();
+    let endedAt: number | null = null;
     const loop = (t: number) => {
       const dt = Math.min(100, t - last);
       last = t;
-      runtime.advanceTo(runtime.now + dt * speed);
-      if (runtime.finished) setPlaying(false);
+      if (runtime.finished) {
+        endedAt ??= t;
+        if (t - endedAt >= END_HOLD_MS) {
+          endedAt = null;
+          runtime.seek(0);
+        }
+      } else {
+        runtime.advanceTo(runtime.now + dt * speed);
+      }
       force();
       raf = requestAnimationFrame(loop);
     };
@@ -107,7 +118,7 @@ export function useSimulation(def: AnySimDefinition) {
       setComponentsOv((o) => ({ ...o, [key]: v }));
     },
     resetOverrides,
-    /** Play/pause; at the end, play restarts from 0 (like a video). */
+    /** Play/pause. Playing loops: at the end it restarts from 0; a paused run at the end restarts on play. */
     togglePlay: () => {
       if (!playing && runtime.finished) runtime.seek(0);
       setPlaying(!playing);

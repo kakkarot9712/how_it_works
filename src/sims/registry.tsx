@@ -30,6 +30,22 @@ const sims: Record<string, ComponentType> = {
       }),
     { ssr: false, loading },
   ),
+  "kafka/produce-and-replicate": dynamic(
+    () =>
+      import("./kafka-replication").then((m) => {
+        const Sim = () => <Player def={m.kafkaReplication} />;
+        return Sim;
+      }),
+    { ssr: false, loading },
+  ),
+  "load-balancing/algorithms": dynamic(
+    () =>
+      import("./lb-algorithms").then((m) => {
+        const Sim = () => <Player def={m.lbAlgorithms} />;
+        return Sim;
+      }),
+    { ssr: false, loading },
+  ),
   "transactions/isolation-levels": dynamic(
     () =>
       import("./pg-isolation").then((m) => {
