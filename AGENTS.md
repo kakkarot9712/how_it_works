@@ -10,13 +10,13 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # syswork
 
-Interactive, animated simulations of how systems work internally (Redis, Kafka, load balancers, consensus), to be hosted at `syswork.vikalpg.in`. Users watch a curated scenario, then take control: they stall a consumer, cut a link, crash a node, or pull a building block out entirely, and see what the system does and why.
+Interactive, animated simulations of how systems work internally (Redis, Kafka, load balancers, consensus), hosted at `sysworking.vikalpg.in`. Users watch a curated scenario, then take control: they stall a consumer, cut a link, crash a node, or pull a building block out entirely, and see what the system does and why.
 
 Audience: engineers who want the real technical details, not a cartoon. It also serves as the owner's showcase project. Accuracy matters more than polish.
 
 ## Stack
 
-Next.js 16.4 (App Router, Turbopack, `cacheComponents`), React 19.3, TypeScript, Tailwind CSS 4, Vitest. pnpm. No backend, no database. Deploy target is Vercel.
+Next.js 16.4 (App Router, Turbopack, `cacheComponents`), React 19.3, TypeScript, Tailwind CSS 4, Vitest. pnpm. No backend, no database. Deployed on Netlify, behind Cloudflare.
 
 ## Commands
 

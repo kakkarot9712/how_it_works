@@ -2,7 +2,7 @@
 
 ## Owner decisions (2026-11-11)
 
-- Separate project, hosted at `syswork.vikalpg.in` (not part of the portfolio repo).
+- Separate project, hosted at `sysworking.vikalpg.in` (not part of the portfolio repo).
 - Audience: people who want to understand how systems work and the technicalities. It is also the owner's demo project.
 - Curated scenarios first. A "lego blocks" sandbox follows: users remove specific parts of a system to see what they do. It is not a free-form build-anything editor.
 - Users must always have direct control in every sim (block a client, kill a broker, and so on).
@@ -32,4 +32,4 @@ Cross-cutting, after phase 2: a comparison mode ("slow consumer" in Pub/Sub, Str
 
 ## Deployment
 
-Vercel project pointed at this repo, custom domain `syswork.vikalpg.in` (CNAME to Vercel). Not set up yet.
+Live at `sysworking.vikalpg.in`, served by Netlify behind Cloudflare.

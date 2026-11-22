@@ -6,7 +6,7 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://syswork.vikalpg.in"),
+  metadataBase: new URL("https://sysworking.vikalpg.in"),
   title: { default: "syswork: how systems actually work", template: "%s · syswork" },
   description:
     "Interactive, animated simulations of system internals: Redis, Kafka, load balancers, consensus. Break things and watch what happens.",
