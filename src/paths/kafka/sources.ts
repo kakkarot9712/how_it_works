@@ -110,11 +110,11 @@ export const pool: SourceSet = {
     },
     {
       id: "consumer-javadoc",
-      title: "KafkaConsumer.java: offsets and consumer position, consumer groups, detecting consumer failures (tag 4.4.0)",
+      title: "KafkaConsumer.java: offsets and consumer position, consumer groups and topic subscriptions, detecting consumer failures (tag 4.4.0)",
       publisher: "Apache Kafka source code",
       url: `${SRC}/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java`,
       accessed: A,
-      covers: ["poll", "position", "committed", "session.timeout.ms", "max.poll.interval.ms"],
+      covers: ["poll", "position", "committed", "group.id", "subscribe", "rebalancing", "session.timeout.ms", "max.poll.interval.ms"],
     },
     {
       id: "consumer-configs",
@@ -122,7 +122,10 @@ export const pool: SourceSet = {
       publisher: "Apache Kafka 4.4 documentation",
       url: "https://kafka.apache.org/44/configuration/consumer-configs/",
       accessed: A,
-      covers: ["fetch.max.wait.ms", "max.poll.records", "enable.auto.commit", "auto.commit.interval.ms", "session.timeout.ms", "max.poll.interval.ms", "group.protocol"],
+      covers: [
+        "fetch.max.wait.ms", "max.poll.records", "enable.auto.commit", "auto.commit.interval.ms", "session.timeout.ms", "max.poll.interval.ms", "group.protocol",
+        "auto.offset.reset", "latest", "by_duration", "metadata.max.age.ms", "group.consumer.heartbeat.interval.ms",
+      ],
     },
     {
       id: "kip-848",

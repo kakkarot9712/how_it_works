@@ -19,7 +19,7 @@
 
 ## Owner decisions (2026-11-24)
 
-- The site is reorganised around **learning paths**: a guided tour of one whole system (Kubernetes, serverless functions, Kafka…), module by module, easy to hard. Simulators stay, as the "Lab" format inside paths and as standalone pages; cheaper formats fill the rest: Explore (one knob, instant result), Trace (one request hop by hop with a state table) and Lab (predict, then check at a deep-linked moment in a simulator).
+- The site is reorganised around **learning paths**: a guided tour of one whole system (Kubernetes, serverless functions, Kafka…), module by module, easy to hard. Simulators stay, as the "Lab" format inside paths and as standalone pages; cheaper formats fill the rest: Explore (one knob, instant result), Trace (one request hop by hop, state shown in each actor's box) and Lab (predict, then check at a deep-linked moment in a simulator).
 - Kafka is the pilot path (`/learn/kafka`, 3 modules, 5 steps), because its two hardest steps were already built as sims. It builds the path framework; Kubernetes follows as the flagship path.
 
 ## Learning paths
@@ -27,7 +27,7 @@
 | Path | Status | Modules and steps |
 | --- | --- | --- |
 | **Kafka** | live (pilot) | The log: keys → partitions → offsets (Explore, murmur2 widget), one record end to end (Trace). Replication: break it (Lab on produce & replicate). Consumers: poll, process, commit and a crash (Trace), break a group (Lab on consumer groups) |
-| Kubernetes | planned (flagship) | System map; `kubectl apply` end to end (Trace); API server objects and watches, etcd and Raft (Lab), controllers and reconcile loops (Lab), scheduler (Explore + Lab), kubelet, CRI and eviction (Trace + Lab), Services and networking (Trace), failure and recovery (Lab) |
+| Kubernetes | planned (flagship); in progress, hidden (`feat/kubernetes-path`): facts skill `kubernetes-facts` (Kubernetes 1.37), map and five Trace/Explore steps built 2026-11-25; the Labs wait for their simulators | System map; `kubectl apply` end to end (Trace); API server objects and watches, etcd and Raft (Lab), controllers and reconcile loops (Lab), scheduler (Explore + Lab), kubelet, CRI and eviction (Trace + Lab), Services and networking (Trace), failure and recovery (Lab) |
 | Serverless functions | planned | Invocation lifecycle (Trace), isolation compared, cold starts (Lab), concurrency and scaling (Lab), async invocation and event sources (Lab). Needs an owner decision first on sources: much of the internals is documented only in papers and talks, not official docs |
 | Redis | planned | Wrap the Pub/Sub and Streams sims with intro steps |
 

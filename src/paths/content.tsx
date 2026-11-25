@@ -8,6 +8,13 @@ import * as kafkaGroupsLab from "./kafka/steps/groups-lab";
 import * as kafkaOneRecord from "./kafka/steps/one-record";
 import * as kafkaReplicationLab from "./kafka/steps/replication-lab";
 import * as kafkaTopicsAndPartitions from "./kafka/steps/topics-and-partitions";
+import { map as kubernetesMap } from "./kubernetes/map";
+import { pool as kubernetesPool } from "./kubernetes/sources";
+import * as kubernetesKubectlApply from "./kubernetes/steps/kubectl-apply";
+import * as kubernetesKubeletAndCri from "./kubernetes/steps/kubelet-and-cri";
+import * as kubernetesFilterAndScore from "./kubernetes/steps/filter-and-score";
+import * as kubernetesObjectsAndWatches from "./kubernetes/steps/objects-and-watches";
+import * as kubernetesServices from "./kubernetes/steps/services";
 
 /** What a step file exports. Server-rendered; `Body` wraps its own content in <Prose>. */
 export interface StepContent {
@@ -40,6 +47,17 @@ export const pathContent: Record<string, PathContent> = {
       "replication-lab": kafkaReplicationLab,
       "consume-and-commit": kafkaConsumeAndCommit,
       "groups-lab": kafkaGroupsLab,
+    },
+  },
+  kubernetes: {
+    pool: kubernetesPool,
+    map: kubernetesMap,
+    steps: {
+      "kubectl-apply": kubernetesKubectlApply,
+      "objects-and-watches": kubernetesObjectsAndWatches,
+      "filter-and-score": kubernetesFilterAndScore,
+      "kubelet-and-cri": kubernetesKubeletAndCri,
+      services: kubernetesServices,
     },
   },
 };

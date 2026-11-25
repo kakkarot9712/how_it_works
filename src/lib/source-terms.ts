@@ -12,6 +12,7 @@ import { GLOSSARY } from "@/lib/glossary";
 export const NOT_TERMS = new Set([
   "DOWN", "PROCESS", // "PROCESS DOWN" overlay
   "SVG", "CSS", "URL", "HTML", "JSON", "API", "INPUT", "TEXTAREA", "SELECT", "STATS", // UI / code words
+  "UTF", // the "UTF" of UTF-8, which has a glossary entry
 ]);
 
 export function files(dir: string): string[] {
@@ -34,7 +35,13 @@ export function readableText(src: string): string {
     if (/^[a-z0-9:\-[\]/_.% ]*$/.test(s) && !/\s[A-Z]/.test(s)) continue;
     out.push(s);
   }
-  for (const m of clean.matchAll(/(?<![=-])>([^<>{}]+)</g)) if (!/[;=]|&&|\|\|/.test(m[1])) out.push(m[1]);
+  // HTML entities (&apos;, &ldquo;…) are prose, not code: decode them first, or the ";" test below drops the whole sentence.
+  // Inline JSX spacers ({" "}) and citations ({cite("x")}) sit inside sentences; without them the sentence is one text run.
+  const text = clean
+    .replace(/&(?:apos|quot|ldquo|rdquo|lsquo|rsquo|amp|hellip|mdash|ndash|nbsp|lt|gt);/g, "'")
+    .replace(/\{\s*"([^"{}]*)"\s*\}/g, "$1")
+    .replace(/\{cite\([^)]*\)\}/g, " ");
+  for (const m of text.matchAll(/(?<![=-])>([^<>{}]+)</g)) if (!/=|&&|\|\|/.test(m[1])) out.push(m[1]); // ";" is common in prose; code runs here contain "=", "&&" or "||" (braces never match)
   return out.join("\n");
 }
 

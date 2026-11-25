@@ -43,6 +43,7 @@ A `Reference` is `{ id, title, publisher, url, accessed, covers }`. `covers` lis
 - Every reference URL starts with one of the module's `officialSources`, unless it carries an owner `approval`.
 - Every `cite("id")` resolves; every reference is cited at least once; references are numbered in order of first citation.
 - Every write-up section except "What this simulation simplifies" has at least one citation.
+- Learning-path steps state each simplification in a "Simplified here" box at the point it applies (`simplified([ids], …)`), linking the official pages with the real behaviour; those ids count as citations.
 - **Coverage:** every all-caps command/option/code (`XAUTOCLAIM`, `NOACK`, `ASAP`) in any user-facing string or JSX text in the module, and every kebab-case config name inside `<code>`, backticks or `<ConfigLine>` (`client-output-buffer-limit`, `min-idle-time`), is in some reference's `covers`. Acronyms with a glossary entry are covered by the glossary instead (its briefs need official sources too; see the `glossary` skill).
 
 The test can't read meaning. It catches names without sources; it can't catch a wrong sentence. That part is on you and on review: every sentence must match its cited page.
@@ -69,6 +70,7 @@ The test can't read meaning. It catches names without sources; it can't catch a 
 | --- | --- |
 | Redis | `https://redis.io/docs/latest/` (commands: `/commands/<name>/`, concepts under `/develop/`, ops under `/operate/`), `redis.conf` and source in `github.com/redis/redis` (raw: `raw.githubusercontent.com/redis/redis/unstable/...`), release notes under `/operate/oss_and_stack/stack-with-enterprise/release-notes/redisce/` |
 | Kafka | `https://kafka.apache.org/<NN>/` (`44` = 4.4: `/design/design/`, `/design/protocol/`, `/configuration/<kind>-configs/`, `/operations/…`), source in `github.com/apache/kafka` (tag `<version>`), KIPs on `cwiki.apache.org/confluence/display/KAFKA`. Verified facts with quotes: the `kafka-facts` skill |
+| Kubernetes | `https://kubernetes.io/` (docs are the latest minor, 1.37; older on `https://v1-<NN>.docs.kubernetes.io/`), source in `github.com/kubernetes/kubernetes` (tag `v<version>`), KEPs in `github.com/kubernetes/enhancements`; etcd at `https://etcd.io/docs/v3.<n>/` and `github.com/etcd-io/etcd`. Page index and verified quotes: the `kubernetes-facts` skill |
 | TCP and other protocols | the RFC on `https://www.rfc-editor.org/rfc/` |
 | Linux | `https://man7.org/linux/man-pages/` (Linux man-pages project), kernel source in `github.com/torvalds/linux` |
 | PostgreSQL | `https://www.postgresql.org/docs/<major>/` (concurrency control is chapter 13, SQL commands under `sql-*.html`, settings under `runtime-config-*.html`), release support at `/support/versioning/`, exact messages in the source at `github.com/postgres/postgres` (branch `REL_<major>_STABLE`) |

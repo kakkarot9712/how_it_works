@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getStep, paths, stepsOf } from "@/paths/catalog";
 import { pathContent } from "@/paths/content";
-import { PathNav, PathOutline, StepFooter, StepKindTag } from "@/components/path";
+import { PathNav, PathOutline, StepFooter, StepKindTag, StepTerms } from "@/components/path";
 import { References, WriteupGrid } from "@/components/writeup";
 import { Eyebrow, gloss, Heading, LinkButton } from "@/components/ui";
 
@@ -66,6 +66,7 @@ async function StepContent({ params }: { params: PageProps<"/learn/[path]/[step]
         </WriteupGrid>
       </header>
       <WriteupGrid className="py-12" rail={<PathOutline path={path} current={step.slug} />}>
+        <StepTerms path={path.slug} step={step.slug} pool={pathContent[path.slug].pool} />
         <Body />
         <StepFooter path={path.slug} step={step.slug} prev={prev} next={next} />
         <References title="References" sources={sources} scope="page" />

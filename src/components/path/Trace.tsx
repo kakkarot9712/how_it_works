@@ -17,6 +17,8 @@ export function Trace({ spec, title }: { spec: TraceSpec; title?: string }) {
   const last = spec.hops.length - 1;
   const go = (i: number) => setAt(Math.max(0, Math.min(last, i)));
   const hop = spec.hops[at];
+  // Concept terms are marked on their first use in each hop's title and body.
+  const hopSeen = new Set<string>();
   const { state, changed } = traceStateAt(spec, at);
   const before = traceStateAt(spec, at - 1).state;
   // What this hop changed, in words: "broker-1 · High watermark (HW) 0 → 1".
@@ -77,11 +79,12 @@ export function Trace({ spec, title }: { spec: TraceSpec; title?: string }) {
           </div>
         </div>
         <Heading level="card" as="h3" className="mt-2">
-          {gloss(hop.title)}
+          {gloss(hop.title, { seen: hopSeen })}
         </Heading>
         <div aria-live="polite" className="mt-2 text-body leading-relaxed text-fg-muted [&_code]:rounded [&_code]:bg-panel-2 [&_code]:px-1 [&_code]:font-mono [&_code]:text-sm [&_code]:text-fg [&_strong]:font-semibold [&_strong]:text-fg">
-          {gloss(hop.body)}
+          {gloss(hop.body, { seen: hopSeen })}
         </div>
+        {hop.simplified && gloss(hop.simplified, { seen: hopSeen })}
 
         {spec.state && (
           <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-line pt-3 text-note text-fg-muted">

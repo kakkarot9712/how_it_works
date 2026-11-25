@@ -33,25 +33,32 @@ const NOT_ACRONYMS = new Set([
   "KAFKA",
   // HTTP request methods (shown in code style; documented by nginx's proxy_next_upstream)
   "POST", "PATCH",
+  // Kubernetes watch event types (shown in code style; documented in Kubernetes API Concepts)
+  "ADDED", "MODIFIED", "BOOKMARK",
+  // HTTP methods and Kubernetes verbs as trace hop labels (documented in Kubernetes API Concepts)
+  "PUT", "GET", "LIST", "WATCH",
+  // kubectl get pods column headers (tool output, shown verbatim)
+  "STATUS", "RESTARTS",
   // Units and plain words in caps
   "KB", "MB", "GB", "ASAP", "DOWN", "PROCESS", "OK", "ID",
+  "UTF", // the "UTF" of UTF-8, which has its own glossary entry
   // UI / code words that end up in strings (class names, keys, element names)
   "INPUT", "TEXTAREA", "SELECT", "SVG", "CSS", "URL", "UI", "STATS", "HTML", "JSON", "API",
 ]);
 
 process.removeAllListeners("warning"); // Node notes it is parsing a .ts file as ESM; harmless here
-const { GLOSSARY } = await import(join(SRC, "lib/glossary.ts")).catch(async () => {
-  // Plain node can't import .ts: read the keys straight from the source.
-  const text = readFileSync(join(SRC, "lib/glossary.ts"), "utf8");
-  const body = text.slice(text.indexOf("GLOSSARY"), text.indexOf("};", text.indexOf("GLOSSARY")));
-  return { GLOSSARY: Object.fromEntries([...body.matchAll(/^\s{2}([A-Z][A-Z0-9]+):/gm)].map((m) => [m[1], true])) };
-});
+// Acronyms only: read their keys from the ACRONYMS block of glossary.ts (plain node can't import the .ts
+// module graph). Concept terms (src/lib/concepts.ts) are words, not acronyms: the define-terms skill checks them.
+const glossarySrc = readFileSync(join(SRC, "lib/glossary.ts"), "utf8");
+const start = glossarySrc.indexOf("const ACRONYMS");
+const body = glossarySrc.slice(start, glossarySrc.indexOf("\n};", start));
+const GLOSSARY = Object.fromEntries([...body.matchAll(/^\s{2}"?([A-Za-z0-9][A-Za-z0-9 -]*)"?: \{/gm)].map((m) => [m[1], true]));
 
 function* files(dir) {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
     if (statSync(p).isDirectory()) yield* files(p);
-    else if (/\.(ts|tsx)$/.test(name) && !/\.test\.tsx?$/.test(name) && !p.endsWith("lib/glossary.ts")) yield p;
+    else if (/\.(ts|tsx)$/.test(name) && !/\.test\.tsx?$/.test(name) && !p.endsWith("lib/glossary.ts") && !p.endsWith("lib/concepts.ts")) yield p;
   }
 }
 
@@ -69,7 +76,12 @@ function readableText(src) {
   }
   // JSX text: between a tag's ">" (not an arrow "=>") and the next "<".
   // Skip fragments that look like code (generics like useState<View>(FIT); …).
-  for (const m of noImports.matchAll(/(?<![=-])>([^<>{}]+)</g)) if (!/[;=]|&&|\|\|/.test(m[1])) out.push(m[1]);
+  // Entities, spacers ({" "}) and citations sit inside prose; decode or drop them first (same as src/lib/source-terms.ts).
+  const prose = noImports
+    .replace(/&(?:apos|quot|ldquo|rdquo|lsquo|rsquo|amp|hellip|mdash|ndash|nbsp|lt|gt);/g, "'")
+    .replace(/\{\s*"([^"{}]*)"\s*\}/g, "$1")
+    .replace(/\{cite\([^)]*\)\}/g, " ");
+  for (const m of prose.matchAll(/(?<![=-])>([^<>{}]+)</g)) if (!/=|&&|\|\|/.test(m[1])) out.push(m[1]);
   return out.join("\n");
 }
 
@@ -86,7 +98,7 @@ for (const file of files(SRC)) {
 
 // SVG text can't hold <Term> tooltips. Every <text> in a canvas or diagram that shows a glossary
 // term must carry a native tooltip: <title>{glossaryTitles(…)}</title> (or glossaryTitle).
-const termRe = new RegExp(`\\b(${Object.keys(GLOSSARY).sort((a, b) => b.length - a.length).join("|")})(?=s?\\b)`);
+const termRe = new RegExp(`(?<![\\w-])(${Object.keys(GLOSSARY).filter((k) => /^[A-Z0-9-]+$/.test(k)).sort((a, b) => b.length - a.length).join("|")})(?=s?(?![\\w-]))`);
 const svgMissing = [];
 for (const file of files(SRC)) {
   if (!/\/canvas\/|Diagram\.tsx$/.test(file)) continue;

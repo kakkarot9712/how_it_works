@@ -6,6 +6,7 @@
  */
 export { AnnotatedConfig } from "./AnnotatedConfig";
 export { Callout } from "./Callout";
+export { Simplified, simplifier } from "./Simplified";
 export { Cite, citer } from "./Cite";
 export { Compare } from "./Compare";
 export { Figure } from "./Figure";

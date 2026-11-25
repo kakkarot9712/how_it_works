@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getPath, pathMinutes, paths, stepsOf } from "@/paths/catalog";
 import { pathContent } from "@/paths/content";
-import { ModuleList, PathStart, SystemMapDiagram } from "@/components/path";
+import { ConnectionTable, ModuleList, PathStart, SystemMapDiagram } from "@/components/path";
 import { FactStrip } from "@/components/writeup";
 import { Container, Eyebrow, gloss, Heading, Help, Surface } from "@/components/ui";
 
@@ -66,11 +66,30 @@ async function PathContent({ params }: { params: PageProps<"/learn/[path]">["par
         <Heading level="section" id="map">
           The system
         </Heading>
-        <Help>Every box is a part of {path.name} that the path explains. Click one to open its step; finished ones get a ✓.</Help>
+        <Help>
+          Every box is a part of {path.name} that the path explains. Click one to open its step; finished ones get a ✓. New to the words?{" "}
+          <Link href={`/learn/${path.slug}/terms`} className="text-accent hover:underline">
+            See all terms
+          </Link>
+          .
+        </Help>
         <Surface className="overflow-x-auto p-4">
           <SystemMapDiagram path={path.slug} map={content.map} />
         </Surface>
       </section>
+
+      {content.map.connections && (
+        <section aria-labelledby="connections" className="mt-14 space-y-3">
+          <Heading level="section" id="connections">
+            Who talks to whom
+          </Heading>
+          <Help>
+            Each row starts at the side that opens the connection, so the arrow is the direction of the request, not always of the data. The last
+            column says which side is in control: the part most often assumed wrong.
+          </Help>
+          <ConnectionTable path={path} connections={content.map.connections} />
+        </section>
+      )}
 
       <section aria-labelledby="steps" className="mt-14 max-w-4xl">
         <Heading level="section" id="steps" className="mb-6">

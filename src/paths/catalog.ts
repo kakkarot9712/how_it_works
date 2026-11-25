@@ -99,14 +99,14 @@ export const allPaths: LearningPath[] = [
       {
         id: "consumers",
         title: "Consumers",
-        summary: "Consumers pull from partitions, one owner per partition in a group, and commit how far they got.",
+        summary: "A consumer group splits a topic's partitions between its members so they share the work, and each group reads the whole topic. Every member pulls its partitions and commits how far it got.",
         steps: [
           {
             slug: "consume-and-commit",
-            title: "Poll, process, commit",
-            summary: "A consumer's fetch, its position, the committed offset, and what a crash between processing and committing costs.",
+            title: "Groups: poll, process, commit",
+            summary: "Why consumers work in groups and how one consumer handles several partitions. Then one consumer's fetch, position and committed offset, and what a crash between processing and committing costs.",
             kind: "trace",
-            minutes: 8,
+            minutes: 10,
           },
           {
             slug: "groups-lab",
@@ -120,10 +120,95 @@ export const allPaths: LearningPath[] = [
       },
     ],
   },
+  {
+    slug: "kubernetes",
+    name: "Kubernetes",
+    title: "Kubernetes, from kubectl apply to a running container",
+    tagline: "The API server, controllers, the scheduler and the kubelet, one idea at a time",
+    lede:
+      "Follow one Deployment from kubectl apply to a running container, and see that every component only watches and writes objects through the API server. Then open each part: the API and etcd, controllers and their reconcile loops, the scheduler, the kubelet, Services, and what happens when a node fails.",
+    topic: "kubernetes",
+    hidden: true,
+    modules: [
+      {
+        id: "big-picture",
+        title: "The big picture",
+        summary: "A cluster is an API server holding desired state, and components that watch it and act. One kubectl apply shows all of them at work.",
+        steps: [
+          {
+            slug: "kubectl-apply",
+            title: "Follow one kubectl apply",
+            summary: "One Deployment, hop by hop: admission, the write to etcd, two controllers, the scheduler's binding, and the kubelet starting the container.",
+            kind: "trace",
+            minutes: 10,
+          },
+        ],
+      },
+      {
+        id: "api",
+        title: "The API server and etcd",
+        summary: "Every object has a resourceVersion. Clients list, then watch from it; the same number turns concurrent writes into conflicts instead of lost updates.",
+        steps: [
+          {
+            slug: "objects-and-watches",
+            title: "Objects, resourceVersion and watches",
+            summary: "A controller lists and watches, two clients race to write one Deployment (409 Conflict), and a watcher that was away too long gets 410 Gone.",
+            kind: "trace",
+            minutes: 10,
+          },
+        ],
+      },
+      {
+        id: "scheduler",
+        title: "The scheduler",
+        summary: "kube-scheduler filters out nodes a Pod can't run on, scores the rest, and binds the Pod to the best. It never starts anything.",
+        steps: [
+          {
+            slug: "filter-and-score",
+            title: "Filter and score",
+            summary: "Set a Pod's requests and toleration, cordon a node, and watch a port of the default filters and resource scores choose, or leave the Pod Pending.",
+            kind: "explore",
+            minutes: 8,
+          },
+        ],
+      },
+      {
+        id: "node",
+        title: "The node",
+        summary: "The kubelet turns a bound Pod into containers through the container runtime, probes them, and restarts them when they fail.",
+        steps: [
+          {
+            slug: "kubelet-and-cri",
+            title: "kubelet, CRI and the Pod lifecycle",
+            summary: "A Pod's sandbox, image and container through CRI, readiness, then two crashes with back-off and a failed liveness probe: phase, Ready and container state side by side.",
+            kind: "trace",
+            minutes: 10,
+          },
+        ],
+      },
+      {
+        id: "networking",
+        title: "Services and networking",
+        summary: "A Service is a stable virtual IP in front of changing Pods. EndpointSlices list the ready ones; kube-proxy turns them into rules on every node.",
+        steps: [
+          {
+            slug: "services",
+            title: "A request to a Service",
+            summary: "Create a Service, follow one request from DNS through kube-proxy's iptables rules to a Pod, then watch a failing readiness probe take a backend out.",
+            kind: "trace",
+            minutes: 10,
+          },
+        ],
+      },
+    ],
+  },
 ];
 
-/** Published paths: what the site lists, routes and prerenders. */
-export const paths = allPaths.filter((p) => !p.hidden);
+/**
+ * Published paths: what the site lists, routes and prerenders. Hidden paths are left out of
+ * production builds but shown under `pnpm dev`, so the owner can review a path while it's built.
+ */
+export const paths = allPaths.filter((p) => !p.hidden || process.env.NODE_ENV === "development");
 
 export function getPath(slug: string): LearningPath | undefined {
   return paths.find((p) => p.slug === slug);

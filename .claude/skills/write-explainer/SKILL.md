@@ -36,7 +36,8 @@ List every claim you'll make: config names and defaults, command and reply forma
 1. **The path of one <unit>**: what state exists and where, then a `Figure` with a diagram of one message/request through the system, with numbered steps in the caption.
 2. **One section per lesson** the scenarios teach (guarantees, buffering, limits, failure modes). Each ends with `<TryIt simHref={simHref} items={see("<scenario-id>", …)} />`.
 3. **When to use something else**: when this tool is right, then a `Compare` table against the alternatives (storage, delivery, guarantee, offline consumer, slow consumer), then bullets.
-4. **What this simulation simplifies**: a `Callout`. Required: time scale, size scaling, protocol shortcuts.
+4. **What if…**: the ambiguous cases a reader will ask about ("what if a partition is added?", "what if there are more consumers than partitions?"), one bold question per paragraph, each answer cited. Include who opens each connection and who decides what when that is the confusing part. Same rule as the `add-path-step` skill's "What if…" section (owner request 2026-11-25).
+5. **What this simulation simplifies**: a `Callout`. Required: time scale, size scaling, protocol shortcuts. Learning-path steps don't use this list: they put each shortcut where it applies with `simplified()` (see `add-path-step`). Prefer that here too for a shortcut tied to one section or diagram.
 
 Writing style:
 - Lead with the mechanism, then the consequence. Short paragraphs.
@@ -44,6 +45,7 @@ Writing style:
 - Real config goes in an `AnnotatedConfig` with every argument labelled.
 - The scariest consequence goes in a `Callout tone="warn"`.
 - `see()` throws on an unknown scenario id, so a renamed scenario fails the build.
+- Concept words (taint, partition, leader…) get first-use hover definitions from `src/lib/concepts.ts` when they have an entry: add one per the `define-terms` skill for any word a reader may not know.
 - Acronyms get hover definitions automatically. When you introduce one, run the `glossary` skill's audit (`node .claude/skills/glossary/audit.mjs`) and add any missing term with an accurate one-line brief.
 
 ## 4. Diagrams

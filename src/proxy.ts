@@ -26,10 +26,11 @@ export function proxy(request: NextRequest) {
   }
 }
 
-/** /learn, /learn/<path>, /learn/<path>/<step>. */
+/** /learn, /learn/<path>, /learn/<path>/terms, /learn/<path>/<step>. */
 function learnOk([path, step, ...rest]: string[]): boolean {
   if (rest.length) return false;
   if (!path) return true;
+  if (step === "terms") return !!getPath(path);
   return step ? !!getStep(path, step) : !!getPath(path);
 }
 

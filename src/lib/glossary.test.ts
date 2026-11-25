@@ -30,7 +30,7 @@ describe("glossary", () => {
   });
 
   it("matches phrases, also capitalized at a sentence start, as one term", () => {
-    expect(terms(gloss("High watermarks and the high watermark, not highwatermark"))).toEqual(["High watermark", "high watermark"]);
+    expect(terms(gloss("High watermarks and the high watermark, not highwatermark", { concepts: true }))).toEqual(["High watermark", "high watermark"]);
     const seen = new Set<string>();
     expect(terms(gloss("High watermark. Then the high watermark again.", { seen }))).toEqual(["High watermark"]);
     expect(glossaryTitles("High watermark stuck at 4")).toMatch(/^high watermark: Kafka's commit point/);
@@ -45,6 +45,12 @@ describe("glossary", () => {
   it("wraps acronyms in text and nested elements, but not code", () => {
     const tree = createElement("p", null, "No FIN or RST arrives over ", createElement("strong", null, "TCP"), " ", createElement("code", null, "OOM"));
     expect(terms(gloss(tree))).toEqual(["FIN", "RST", "TCP"]);
+  });
+
+  it("marks concept terms only in first-use mode, and not inside hyphenated names", () => {
+    expect(terms(gloss("the leader of node-1 and kube-proxy"))).toEqual([]);
+    expect(terms(gloss("the leader of node-1 and a node", { seen: new Set() }))).toEqual(["leader", "node"]);
+    expect(terms(gloss("Rebalancing the group", { seen: new Set() }))).toEqual(["Rebalancing"]);
   });
 
   it("with a shared `seen` set, marks only the first use", () => {

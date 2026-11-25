@@ -76,6 +76,36 @@ export const allTopics: Topic[] = [
     ],
   },
   {
+    slug: "kubernetes",
+    name: "Kubernetes",
+    kind: "technology",
+    hidden: true,
+    tagline: "Container orchestration: an API server, controllers and kubelets",
+    sims: [
+      {
+        slug: "reconcile-loops",
+        title: "Controllers & reconcile loops",
+        summary: "A Deployment, its ReplicaSet and Pods kept at the desired count. Delete Pods, stop the controller manager, scale up and down.",
+        status: "planned",
+        concepts: ["reconcile loop", "desired state"],
+      },
+      {
+        slug: "scheduler",
+        title: "kube-scheduler",
+        summary: "Filtering and scoring nodes for each Pod, unschedulable Pods, and preemption by priority.",
+        status: "planned",
+        concepts: ["scheduling"],
+      },
+      {
+        slug: "node-failure",
+        title: "Node failure & eviction",
+        summary: "Node heartbeats and leases, a node going silent, taint-based eviction and node-pressure eviction.",
+        status: "planned",
+        concepts: ["failure detection", "heartbeats"],
+      },
+    ],
+  },
+  {
     slug: "load-balancing",
     name: "Load balancing",
     kind: "concept",

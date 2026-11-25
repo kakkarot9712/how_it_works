@@ -5,6 +5,8 @@ description: Explain acronyms and codes to readers with hover tooltips (TCP, FIN
 
 # Glossary: acronyms explained on hover
 
+This skill covers **acronyms** (TCP, ISR, CRI). Concept **words** (taint, partition, controller), the "New words in this step" box and the Terms pages are the `define-terms` skill; both live in the same `GLOSSARY` dictionary.
+
 Every acronym a reader sees has a hover, focus or tap tooltip with what it stands for and one line on what it means *here*. AGENTS.md rule 12. The pieces:
 
 | Piece | Where | Role |

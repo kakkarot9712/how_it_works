@@ -69,13 +69,13 @@ src/
     kafka/           sources.ts (pool), map.ts, steps/<slug>.tsx, widgets/
   catalog.ts         topics and sims (live or planned): drives home, topic pages, metadata
   app/
-    (site)/          site header: /, /[topic], /learn, /learn/[path]
+    (site)/          site header: /, /[topic], /learn, /learn/[path], /learn/[path]/terms
     (path)/          PathNav bar: /learn/[path]/[step]
     (sim)/           no site header, compact SimNav bar:
                      /[topic]/[sim] (simulator, full viewport) and /[topic]/[sim]/how-it-works (write-up)
   proxy.ts           real 404 status for unknown topic/sim/path/step URLs (checks the static catalogs)
 docs/                architecture.md, roadmap.md
-.claude/skills/      add-path-step, add-simulation, add-scenario, design-system, ui-components, write-explainer, glossary, verify-simulation, source-facts, scenario-flow
+.claude/skills/      add-path-step, define-terms, kafka-facts, kubernetes-facts, add-simulation, add-scenario, design-system, ui-components, write-explainer, glossary, verify-simulation, source-facts, scenario-flow
 ```
 
 Read [docs/architecture.md](docs/architecture.md) before touching the engine or adding a sim. [docs/roadmap.md](docs/roadmap.md) holds the plan and the owner's decisions.
@@ -94,6 +94,7 @@ Read [docs/architecture.md](docs/architecture.md) before touching the engine or 
 10. **One design system.** Colours, type scales (HTML and SVG), radius, shadows, z-layers and states come from the tokens in `src/app/globals.css`, used as the `design-system` skill describes. No one-off colours, sizes or shadows; its audit (`node .claude/skills/design-system/audit.mjs`) must pass.
 11. **Build from the kits.** Use the shared components (`ui-components` skill) instead of copying markup or class strings. A pattern needed twice becomes a component in the right kit.
 12. **Acronyms are explained.** Every acronym shown to users (TCP, FIN, RST, OOM…) has an entry in `src/lib/glossary.ts`, and text goes through `gloss()` (built into the shared text components) so readers can hover for a one-line meaning. See the `glossary` skill; its audit script finds gaps.
+13. **Every term is defined where it is first used.** Concept words (taint, partition, controller…) live in `src/lib/concepts.ts`, one entry per idea shared across systems; each step shows its new words at the top and every path has a Terms page. Follow the `define-terms` skill; `src/paths/paths.test.ts` fails a step that uses a term before it is taught.
 
 ## Verifying a change
 

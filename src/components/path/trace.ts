@@ -21,6 +21,8 @@ export interface TraceHop {
   title: string;
   /** What happens and why, with citations. Short: two to four sentences. */
   body: ReactNode;
+  /** What this hop simplifies, shown under its body as a "Simplified here" box: `simplified([refs], <>…</>)`. */
+  simplified?: ReactNode;
   /** State this hop changes: actor id → field → new value. Fields not named keep their value. */
   set?: Record<string, Record<string, string>>;
 }

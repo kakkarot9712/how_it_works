@@ -23,6 +23,8 @@ export interface Prediction {
  * then gets the explanation and a deep link that opens the simulator at that moment.
  */
 export function Predict({ n, prediction: p, simHref }: { n: number; prediction: Prediction; simHref: string }) {
+  // Concept terms are marked on their first use in the card.
+  const seen = new Set<string>();
   const [picked, setPicked] = useState<number | null>(null);
   const answered = picked !== null;
   const right = answered && p.options[picked].correct;
@@ -32,9 +34,9 @@ export function Predict({ n, prediction: p, simHref }: { n: number; prediction: 
       <header className="border-b border-line px-5 py-4">
         <Eyebrow tone="accent">Predict {n}</Eyebrow>
         <Heading level="card" as="h3" className="mt-1">
-          {gloss(p.question)}
+          {gloss(p.question, { seen })}
         </Heading>
-        <p className="mt-1 text-sm leading-relaxed text-fg-muted">{gloss(p.setup)}</p>
+        <p className="mt-1 text-sm leading-relaxed text-fg-muted">{gloss(p.setup, { seen })}</p>
       </header>
 
       <div className="space-y-2 px-5 py-4" role="group" aria-label="Your prediction">
@@ -64,7 +66,7 @@ export function Predict({ n, prediction: p, simHref }: { n: number; prediction: 
         <div className="border-t border-line bg-panel-2/50 px-5 py-4">
           <Eyebrow tone={right ? "ok" : "warn"}>{right ? "✓ Right" : "✕ Not quite"}</Eyebrow>
           <div className="mt-1.5 text-body leading-relaxed text-fg-muted [&_code]:rounded [&_code]:bg-panel-2 [&_code]:px-1 [&_code]:font-mono [&_code]:text-sm [&_code]:text-fg [&_strong]:font-semibold [&_strong]:text-fg">
-            {gloss(p.explain)}
+            {gloss(p.explain, { seen })}
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <LinkButton href={`${simHref}?s=${p.scenario}&t=${p.t}`}>▶ Check it in the simulator</LinkButton>

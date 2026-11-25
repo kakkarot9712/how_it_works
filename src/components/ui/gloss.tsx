@@ -1,5 +1,5 @@
 import { cloneElement, Fragment, isValidElement, type ReactNode } from "react";
-import { GLOSSARY_RE, glossaryKey } from "@/lib/glossary";
+import { ACRONYM_RE, GLOSSARY_RE, glossaryKey } from "@/lib/glossary";
 import { Term } from "./Term";
 
 /** Elements whose text is left alone: code is literal, and links/buttons can't hold a focusable term. */
@@ -10,10 +10,17 @@ export interface GlossOptions {
   seen?: Set<string>;
   /** False inside clickable rows (e.g. narration entries are buttons). */
   focusable?: boolean;
+  /**
+   * Also mark concept terms (taint, partition, controller…), not just acronyms. On by default
+   * when `seen` is given (first use only); text marked on every use (narration, inspector
+   * help, labels) gets acronyms only, so common words don't fill it with underlines.
+   */
+  concepts?: boolean;
 }
 
 /**
- * Wraps glossary acronyms (TCP, FIN, RST, OOM…) found in text with <Term> tooltips.
+ * Wraps glossary terms found in text with <Term> tooltips: acronyms (TCP, FIN, OOM…) always,
+ * concept terms (taint, partition…) in first-use mode (see `concepts`).
  * Works on strings and on element trees (recurses into children, skipping code,
  * links and buttons). Server-safe.
  */
@@ -28,8 +35,8 @@ export function gloss(node: ReactNode, opts: GlossOptions = {}): ReactNode {
   return node;
 }
 
-function glossText(text: string, { seen, focusable = true }: GlossOptions): ReactNode {
-  const parts = text.split(GLOSSARY_RE);
+function glossText(text: string, { seen, focusable = true, concepts = seen !== undefined }: GlossOptions): ReactNode {
+  const parts = text.split(concepts ? GLOSSARY_RE : ACRONYM_RE);
   if (parts.length === 1) return text;
   // split() with a capture group puts matches at odd indices.
   return parts.map((p, i) => {

@@ -4,13 +4,32 @@
  * Keep each `brief` to one or two plain sentences, accurate, and relevant to how
  * the term shows up on this site. Add a term here the first time a sim uses it.
  */
+import { CONCEPTS } from "./concepts";
+
+/** Where a learning path teaches a concept term (see concepts.ts). */
+export interface Taught {
+  path: string;
+  /** The first step of the path whose text uses the term. */
+  step: string;
+  /** Reference id in that path's source pool: the fact behind the brief and note. */
+  ref: string;
+  /** What the term means in this system, when the brief is generic. */
+  note?: string;
+  /** Further reference ids in the same pool, for a term with more to it than a brief can hold ("read more"). */
+  more?: string[];
+}
+
 export interface GlossaryEntry {
   /** What the letters stand for. */
   expansion?: string;
   brief: string;
+  /** Other spellings that match, beyond the key and its plural "s" (rebalancing, tainted). */
+  forms?: string[];
+  /** Concept terms only: where each learning path teaches it. Acronyms have none. */
+  taught?: Taught[];
 }
 
-export const GLOSSARY: Record<string, GlossaryEntry> = {
+const ACRONYMS: Record<string, GlossaryEntry> = {
   TCP: {
     expansion: "Transmission Control Protocol",
     brief: "Reliable, ordered byte stream between two hosts. Flow control (the window) stops a sender when the receiver's buffers are full.",
@@ -102,6 +121,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     brief: "In Kafka, the offset up to which every in-sync replica has the partition's records. Records below it are committed; consumers only read below it.",
   },
   "high watermark": {
+    taught: [{ path: "kafka", step: "one-record", ref: "partition-scala", note: "The smallest log end offset in the ISR." }],
     brief: "Kafka's commit point (HW): the smallest log end offset in the ISR. Records below it are committed and readable by consumers. It only moves while the ISR has at least min.insync.replicas members.",
   },
   LEO: {
@@ -136,26 +156,66 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     expansion: "Write-Ahead Log",
     brief: "Changes are appended to a log on disk before they're applied, so a crash can be recovered by replaying the log.",
   },
+  CPU: {
+    expansion: "Central Processing Unit",
+    brief: "Processor time. Kubernetes measures it in cores and millicores: 500m is half a core. Pods request it so the scheduler can place them.",
+  },
+  DNS: {
+    expansion: "Domain Name System",
+    brief: "Turns names into IP addresses. In Kubernetes, a Service's name resolves to its cluster IP.",
+  },
+  IP: {
+    expansion: "Internet Protocol",
+    brief: "The network layer that addresses and routes packets between hosts. Every Pod gets its own IP address; a Service gets a virtual one.",
+  },
+  DNAT: {
+    expansion: "Destination Network Address Translation",
+    brief: "Rewriting a packet's destination address on the way through. kube-proxy's rules use it to turn a Service's IP into a Pod's.",
+  },
+  "UTF-8": {
+    expansion: "Unicode Transformation Format, 8-bit",
+    brief: "The common way to turn text into bytes: ASCII characters take one byte each, other characters two to four.",
+  },
+  CRI: {
+    expansion: "Container Runtime Interface",
+    brief: "The gRPC API the kubelet uses to tell the container runtime to start pod sandboxes, pull images and run containers.",
+  },
 };
+
+/** Acronyms and concept terms, one dictionary. */
+export const GLOSSARY: Record<string, GlossaryEntry> = { ...ACRONYMS, ...CONCEPTS };
+
+/** A concept term (taught by a path) rather than an acronym. */
+export const isConcept = (key: string) => Boolean(GLOSSARY[key]?.taught);
 
 /**
  * Phrases (lowercase keys like "high watermark") also match with a capital first
  * letter at the start of a sentence; `glossaryKey` maps that back to the entry.
  */
 const capitalize = (t: string) => t[0].toUpperCase() + t.slice(1);
-const VARIANTS = Object.keys(GLOSSARY).flatMap((t) => (/^[a-z]/.test(t) ? [t, capitalize(t)] : [t]));
+/** Every spelling that matches → its key: the key and its `forms`, lowercase ones also capitalized. */
+const FORM_TO_KEY = new Map<string, string>();
+for (const [key, g] of Object.entries(GLOSSARY))
+  for (const f of [key, ...(g.forms ?? [])]) for (const v of /^[a-z]/.test(f) ? [f, capitalize(f)] : [f]) FORM_TO_KEY.set(v, key);
 
-/** The GLOSSARY key for a matched term ("High watermark" -> "high watermark"), or undefined. */
+/** The GLOSSARY key for a matched term ("High watermark" -> "high watermark", "Rebalancing" -> "rebalance"), or undefined. */
 export function glossaryKey(term: string): string | undefined {
-  if (GLOSSARY[term]) return term;
-  const lower = term[0].toLowerCase() + term.slice(1);
-  return GLOSSARY[lower] ? lower : undefined;
+  return FORM_TO_KEY.get(term);
 }
 
-/** Longest first, so RESP2 wins over RESP. */
-const TERMS = VARIANTS.sort((a, b) => b.length - a.length);
-/** Whole-word match, plus a plural "s" (PELs, ACKs): the "s" stays outside the captured term. */
-export const GLOSSARY_RE = new RegExp(`\\b(${TERMS.join("|")})(?=s?\\b)`, "g");
+const escape = (t: string) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+/**
+ * Whole-word match, longest first (RESP2 over RESP), plus a plural "s" (PELs, ACKs) that
+ * stays outside the captured term. A hyphen counts as part of a word, so "node" doesn't
+ * match inside "node-1" and "proxy" doesn't match inside "kube-proxy".
+ */
+const matcher = (forms: string[]) =>
+  new RegExp(`(?<![\\w-])(${forms.sort((a, b) => b.length - a.length).map(escape).join("|")})(?=s?(?![\\w-]))`, "g");
+const ALL_FORMS = [...FORM_TO_KEY.keys()];
+/** Every term: acronyms and concepts. */
+export const GLOSSARY_RE = matcher(ALL_FORMS);
+/** Acronyms only, for text marked on every use (narration, inspector help), where concept words would clutter. */
+export const ACRONYM_RE = matcher(ALL_FORMS.filter((f) => !isConcept(FORM_TO_KEY.get(f)!)));
 
 /** Native tooltip text for every glossary term in `text` (for an SVG <title>), or undefined if it has none. */
 export function glossaryTitles(text: string): string | undefined {
@@ -168,4 +228,23 @@ export function glossaryTitle(term: string): string | undefined {
   const key = glossaryKey(term);
   const g = key && GLOSSARY[key];
   return g && `${key}${g.expansion ? ` (${g.expansion})` : ""}: ${g.brief}`;
+}
+
+export interface TaughtTerm {
+  key: string;
+  entry: GlossaryEntry;
+  taught: Taught;
+  /** Other paths that teach the same idea (the cross-system cue). */
+  alsoIn: string[];
+}
+
+/** Concept terms a path teaches, alphabetically; only those first used in `step` if given. */
+export function conceptsTaught(path: string, step?: string): TaughtTerm[] {
+  return Object.entries(GLOSSARY)
+    .flatMap(([key, entry]) =>
+      (entry.taught ?? [])
+        .filter((t) => t.path === path && (step === undefined || t.step === step))
+        .map((taught) => ({ key, entry, taught, alsoIn: entry.taught!.filter((t) => t.path !== path).map((t) => t.path) })),
+    )
+    .sort((a, b) => a.key.localeCompare(b.key, "en", { sensitivity: "base" }));
 }
