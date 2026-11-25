@@ -93,6 +93,10 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     expansion: "Eligible Leader Replicas",
     brief: "Kafka 4.x: replicas outside the ISR that still hold every committed record, so the controller may elect one when the ISR is empty.",
   },
+  HB: {
+    expansion: "Heartbeat",
+    brief: "A consumer's periodic message to the group coordinator saying it is still alive. Its reply can tell the consumer to give up or take partitions.",
+  },
   HW: {
     expansion: "High watermark",
     brief: "In Kafka, the offset up to which every in-sync replica has the partition's records. Records below it are committed; consumers only read below it.",

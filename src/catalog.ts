@@ -68,8 +68,9 @@ export const allTopics: Topic[] = [
       {
         slug: "consumer-groups",
         title: "Consumer groups",
-        summary: "Keys and the partitioner, pull-based consumers, lag, offset commits and rebalancing.",
-        status: "planned",
+        summary:
+          "Keys hashed to partitions, one owner per partition, long-poll fetches, lag and offset commits. Crash, slow down or poison a consumer and see duplicates, lost records and rebalances, classic and incremental.",
+        status: "live",
         concepts: ["pull delivery", "at-least-once", "backpressure"],
       },
     ],

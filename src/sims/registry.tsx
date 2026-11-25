@@ -38,6 +38,14 @@ const sims: Record<string, ComponentType> = {
       }),
     { ssr: false, loading },
   ),
+  "kafka/consumer-groups": dynamic(
+    () =>
+      import("./kafka-consumer-groups").then((m) => {
+        const Sim = () => <Player def={m.kafkaConsumerGroups} />;
+        return Sim;
+      }),
+    { ssr: false, loading },
+  ),
   "load-balancing/algorithms": dynamic(
     () =>
       import("./lb-algorithms").then((m) => {

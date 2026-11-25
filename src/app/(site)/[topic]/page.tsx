@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getTopic, topics } from "@/catalog";
-import { SimGrid } from "@/components/site";
+import { paths } from "@/paths/catalog";
+import { PathCard, SimGrid } from "@/components/site";
 import { Container, Heading } from "@/components/ui";
 
 export function generateStaticParams() {
@@ -38,6 +39,13 @@ async function TopicContent({ params }: { params: PageProps<"/[topic]">["params"
         {t.name}
       </Heading>
       <p className="mt-2 text-sm text-fg-muted">{t.tagline}</p>
+      {paths
+        .filter((p) => p.topic === t.slug)
+        .map((p) => (
+          <div key={p.slug} className="mt-8 max-w-2xl">
+            <PathCard path={p} />
+          </div>
+        ))}
       <div className="mt-8">
         <SimGrid topic={t} />
       </div>

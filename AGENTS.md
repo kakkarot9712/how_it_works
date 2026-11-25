@@ -12,6 +12,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 Interactive, animated simulations of how systems work internally (Redis, Kafka, load balancers, consensus), to be hosted at `syswork.vikalpg.in`. Users watch a curated scenario, then take control: they stall a consumer, cut a link, crash a node, or pull a building block out entirely, and see what the system does and why.
 
+The site is organised as **learning paths** (`/learn/<path>`): a guided tour of one whole system, module by module, easy to hard. Each step uses the format that fits it: an Explore widget, a Trace (one request hop by hop), or a Lab (predict, then check in a simulator). Simulators are the expensive format, used where things change over time or fail. See the `add-path-step` skill.
+
 Audience: engineers who want the real technical details, not a cartoon. It also serves as the owner's showcase project. Accuracy matters more than polish.
 
 ## Stack
@@ -23,7 +25,7 @@ Next.js 16.4 (App Router, Turbopack, `cacheComponents`), React 19.3, TypeScript,
 | Command | What it does |
 | --- | --- |
 | `pnpm dev` | Dev server on :3000 |
-| `pnpm test` | Vitest: engine and model behavior tests, plus the cross-sim checks (sources, flows, lanes) |
+| `pnpm test` | Vitest: engine and model behavior tests, plus the cross-sim checks (sources, flows, lanes) and path checks |
 | `pnpm typecheck` | `tsc --noEmit` (run `pnpm next typegen` first if route types are missing) |
 | `pnpm lint` | ESLint |
 | `pnpm build` | Production build. Must pass before you say a change is done |
@@ -41,13 +43,15 @@ src/
     canvas/          SVG blocks for sim diagrams (NodeBox, Packet, Bar, Boundary, Wire, rows), Focus (flow
                      spotlight), packetWidth/PACKET_LANE/LANE_MARGIN (packet lanes)
     inspector/       InspectorHeader, InspectorEmpty, ConfigLine
+    path/            learning-path kit: PathNav, PathOutline, ModuleList, PathStart, StepFooter, SystemMapDiagram,
+                     step formats Trace (sequence diagram, state in the actor boxes) and Predict, useProgress (localStorage)
     writeup/         /how-it-works kit (Prose, WriteupSection, Figure, Callout, Compare, TryIt, Toc, hero, walkthroughs,
                      Cite/citer, References)
-    site/            Logo, SiteHeader, SimNav, SimCard, SimGrid
+    site/            Logo, SiteHeader, SimNav, SimCard, SimGrid, PathCard
   player/            shared simulator shell: Player, useSimulation, useShortcuts, url, ScenarioBar/Picker/Info,
                      FlowBar (Watch strip), BlocksDrawer, LogFeed, Timeline, ZoomPan
   lib/               cx (class names, server-safe), format (secs), glossary (acronym definitions),
-                     sources (SourceSet/Reference types for citations)
+                     sources (SourceSet/Reference types, pickSources), source-terms (test helper), murmur2
   sims/
     types.ts         SimDefinition contract between a sim and the player
     registry.tsx     client map "topic/sim" -> lazy-loaded <Player def=…/>
@@ -58,14 +62,20 @@ src/
     redis-pubsub/    model.ts, scenarios.ts, walkthroughs.ts, sources.ts, theme.ts, index.ts, tests,
                      canvas/ (layout.ts + one file per node type), inspector/ (one panel per node type), writeup/
     redis-streams/   same layout
+  paths/
+    catalog.ts       learning paths: modules and steps (metadata, server-safe)
+    content.tsx      path -> { source pool, system map, step content }
+    paths.test.ts    sourcing per step, traces well formed, lab predictions open real scenario moments
+    kafka/           sources.ts (pool), map.ts, steps/<slug>.tsx, widgets/
   catalog.ts         topics and sims (live or planned): drives home, topic pages, metadata
   app/
-    (site)/          site header: /, /[topic]
+    (site)/          site header: /, /[topic], /learn, /learn/[path]
+    (path)/          PathNav bar: /learn/[path]/[step]
     (sim)/           no site header, compact SimNav bar:
                      /[topic]/[sim] (simulator, full viewport) and /[topic]/[sim]/how-it-works (write-up)
-  proxy.ts           real 404 status for unknown topic/sim URLs (checks the static catalog)
+  proxy.ts           real 404 status for unknown topic/sim/path/step URLs (checks the static catalogs)
 docs/                architecture.md, roadmap.md
-.claude/skills/      add-simulation, add-scenario, design-system, ui-components, write-explainer, glossary, verify-simulation, source-facts, scenario-flow
+.claude/skills/      add-path-step, add-simulation, add-scenario, design-system, ui-components, write-explainer, glossary, verify-simulation, source-facts, scenario-flow
 ```
 
 Read [docs/architecture.md](docs/architecture.md) before touching the engine or adding a sim. [docs/roadmap.md](docs/roadmap.md) holds the plan and the owner's decisions.

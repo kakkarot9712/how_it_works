@@ -63,3 +63,19 @@ export function refNumber(sources: SourceSet, id: string): number {
   if (i < 0) throw new Error(`Unknown reference "${id}" in ${sources.label} sources`);
   return i + 1;
 }
+
+/**
+ * A page's own source set, drawn from a shared pool (a learning path's references):
+ * the same subject and version, with only the references this page cites, in the
+ * order it first cites them, so its [n] numbers start at 1. Unknown ids throw.
+ */
+export function pickSources(pool: SourceSet, ids: string[]): SourceSet {
+  return {
+    ...pool,
+    references: ids.map((id) => {
+      const r = pool.references.find((x) => x.id === id);
+      if (!r) throw new Error(`Unknown reference "${id}" in ${pool.label} sources`);
+      return r;
+    }),
+  };
+}

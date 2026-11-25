@@ -28,7 +28,7 @@ export function Heading({
   children,
 }: {
   level: keyof typeof LEVELS;
-  as?: "h1" | "h2" | "h3" | "h4" | "p";
+  as?: "h1" | "h2" | "h3" | "h4" | "p" | "span";
   id?: string;
   className?: string;
   children: ReactNode;

@@ -14,6 +14,8 @@ const SRC = join(ROOT, "src");
 
 /** All-caps words that are not acronyms readers need explained. Keep reasons short. */
 const NOT_ACRONYMS = new Set([
+  // kafka-consumer-groups.sh --describe column headers (tool output, shown verbatim)
+  "TOPIC", "PARTITION", "PARTITIONS", "CURRENT", "OFFSET", "LOG", "END", "LAG", "CONSUMER",
   // Redis commands (shown in code style; documented by Redis itself)
   "PUBLISH", "SUBSCRIBE", "PSUBSCRIBE", "UNSUBSCRIBE", "PUNSUBSCRIBE", "SSUBSCRIBE", "SPUBLISH", "SUNSUBSCRIBE",
   "PING", "RESET", "QUIT", "CLIENT", "KILL", "HELLO", "XADD", "XREAD", "XREADGROUP", "XACK", "XCLAIM",

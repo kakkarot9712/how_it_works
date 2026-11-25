@@ -1,0 +1,105 @@
+import type { Walkthrough } from "@/sims/explainers";
+
+export const walkthroughs: Walkthrough[] = [
+  {
+    id: "happy",
+    setup: "Defaults: two consumers, consumer protocol (KIP-848), auto commit every 5 s, a record every 0.4 s spread over six keys.",
+    moments: [
+      { t: 0, log: "picks each partition from the record key", text: "The producer hashes every key with murmur2 and takes it modulo 3: u2 and u4 go to `orders-0`, u1 and u3 to `orders-1`, u5 and u7 to `orders-2`." },
+      { t: 100, log: "consumer-1 joined", text: "consumer-1's join reaches the coordinator first and is given all three partitions; consumer-2's join, right behind it, bumps the group epoch again." },
+      { t: 1300, log: "consumer-1 revokes orders-2", text: "The new target splits the partitions two and one. consumer-1 gives up `orders-2` at its next `poll()`, commits it and acknowledges in its next heartbeat." },
+      { t: 2300, log: "consumer-2 is assigned orders-2", text: "Only then does the coordinator hand `orders-2` to consumer-2, starting at the committed offset." },
+      { text: "From here on there is no narration: consumers long-poll, process, and auto-commit every 5 s. Lag on each partition stays at a few records, the ones processed since the last commit." },
+    ],
+    takeaway: "Keys pick the partition, each partition has exactly one owner in the group, and the committed offset trails the work by up to one auto-commit interval.",
+    tryNext: ["Turn off the **Partition by key** block and watch the producer card: one key now goes to every partition.", "Click **Send a burst of 10** on the producer and watch lag jump and drain."],
+  },
+  {
+    id: "scale-out",
+    setup: "Like the healthy run; consumer-3 starts at 6 s and consumer-4 at 16 s.",
+    moments: [
+      { t: 6200, log: "consumer-3 joined", text: "The group epoch goes up and the coordinator computes a new target: one partition each. Only `orders-1` has to move." },
+      { t: 6800, log: "consumer-1 revokes orders-1", text: "consumer-1 revokes just `orders-1` and keeps consuming `orders-0`. consumer-2 is never told anything." },
+      { t: 7300, log: "consumer-3 is assigned orders-1", text: "After consumer-1's acknowledgement, consumer-3 gets `orders-1` from its committed offset." },
+      { t: 16100, log: "consumer-4 joined", text: "A fourth member, three partitions: the target gives consumer-4 nothing, and the group is immediately Stable again." },
+    ],
+    takeaway: "With the consumer protocol a rebalance pauses only the partitions that move. A group's parallelism is capped at the number of partitions.",
+    tryNext: ["Run **Classic protocol: everyone stops** for the same join on the classic protocol.", "**Crash (kill -9)** consumer-1 after 16 s: the idle consumer-4 finally gets work."],
+  },
+  {
+    id: "crash-duplicates",
+    setup: "Defaults (auto commit every 5 s). consumer-1, which owns `orders-0` and `orders-1`, is killed at 9 s and restarted at 21 s.",
+    moments: [
+      { t: 9000, log: "consumer-1 crashes", text: "No LeaveGroup and no final commit. The last auto commit was around 5 s, so about 4 s of processed records are not committed." },
+      { text: "For the next 4 seconds nothing moves on `orders-0` and `orders-1`: the coordinator still counts consumer-1 as a member, and lag climbs." },
+      { t: 13000, log: "No heartbeat from consumer-1", text: "The session timeout (4.5 s here, 45 s by default) passes without a heartbeat, and the coordinator removes consumer-1." },
+      { t: 13300, log: "consumer-2 is assigned orders-0, orders-1", text: "consumer-2 takes both partitions from their committed offsets, not from where consumer-1 actually stopped." },
+      { t: 13800, log: "a second time", text: "So it processes the records consumer-1 did after its last commit again: duplicates." },
+      { t: 21100, log: "consumer-1 joined", text: "consumer-1 restarts and rejoins; the sticky assignor moves one partition back to it." },
+    ],
+    takeaway: "At-least-once: a crash costs a session timeout of no progress, then a replay of everything since the last commit.",
+    tryNext: ["Set **auto.commit.interval.ms** lower in the drawer: fewer duplicates.", "Use **Shut down cleanly** instead: it commits and leaves at once, with no wait and no duplicates."],
+  },
+  {
+    id: "at-most-once",
+    setup: "**Offset commits: before processing** (`enable.auto.commit=false`, `commitSync()` as soon as a batch arrives), 0.5 s per record. consumer-1 is killed at 10 s.",
+    moments: [
+      { text: "Watch a partition tape: the committed bar sits at the end of each fetched batch while its records are still teal, not yet processed." },
+      { t: 10000, log: "consumer-1 crashes", text: "consumer-1 dies partway through a batch that it has already committed." },
+      { t: 14600, log: "No heartbeat from consumer-1", text: "After the session timeout its partitions are reassigned." },
+      { t: 15300, log: "committed but never processed: lost", text: "consumer-2 starts at the committed offsets. The rest of consumer-1's batch is behind them, so nobody will ever process those records." },
+    ],
+    takeaway: "Committing before processing turns every crash into silent loss, with no duplicates. Commit after processing for at-least-once.",
+    tryNext: ["Switch **Offset commits** to **after processing** and replay: duplicates instead of loss."],
+  },
+  {
+    id: "stop-the-world",
+    setup: "The **Incremental rebalancing** block is removed: classic protocol with the default eager `RangeAssignor`. consumer-3 starts at 6 s.",
+    moments: [
+      { t: 6200, log: "The whole group stops", text: "consumer-3's JoinGroup puts the group in PreparingRebalance. The others find out from their next heartbeat (`REBALANCE_IN_PROGRESS`)." },
+      { t: 6800, log: "consumer-1 revokes orders-0, orders-1", text: "Eager: consumer-1 revokes everything, even `orders-0`, which it will get straight back." },
+      { t: 6900, log: "consumer-2 revokes orders-2", text: "consumer-2 does the same. For a moment no partition has an owner." },
+      { t: 7000, log: "RangeAssignor hands out partitions", text: "Once every member has rejoined, RangeAssignor gives one partition each, in order: consumer-2 ends up on `orders-1`, not its old `orders-2`." },
+    ],
+    takeaway: "On the classic eager protocol every rebalance is a full stop for the whole group, and partitions move even when they don't need to.",
+    tryNext: ["Turn **Incremental rebalancing** back on and replay: only one partition pauses."],
+  },
+  {
+    id: "slow-consumer",
+    setup: "**Offset commits: after processing**. At 4 s consumer-1 becomes 6× slower: 1.5 s per record, 7.5 s per batch of five, against a `max.poll.interval.ms` of 6 s.",
+    moments: [
+      { t: 4000, log: "consumer-1 slows down", text: "consumer-1 keeps heartbeating, so the coordinator sees nothing wrong. Watch its poll timer instead." },
+      { t: 14100, log: "poll timeout expired", text: "More than 6 s since its last `poll()`: the client logs the poll-timeout warning and leaves the group." },
+      { t: 15300, log: "consumer-2 is assigned orders-0, orders-1", text: "consumer-2 takes over from the committed offsets." },
+      { t: 15800, log: "a second time", text: "consumer-1 never committed that batch, so consumer-2 repeats it." },
+      { t: 17100, log: "calls poll() again and rejoins", text: "consumer-1 finishes its batch and finally calls `poll()`." },
+      { t: 17400, log: "CommitFailedException", text: "Its commit is rejected: only members may commit, and it left. It rejoins and is given `orders-2`, still too slow for a full batch." },
+    ],
+    takeaway: "Heartbeats prove the process is alive; the poll timer proves it is making progress. Keep one batch's processing time well under `max.poll.interval.ms`.",
+    tryNext: ["Lower **max.poll.records** to 2 and replay: smaller batches fit in the interval.", "Set consumer-1's **Slow processing** back to 1×."],
+  },
+  {
+    id: "poison",
+    setup: "The **Dead-letter handling** block is removed: the application retries a failing record forever. At 5 s a poison record goes to `orders-2`.",
+    moments: [
+      { t: 5000, log: "can't process", text: "To Kafka it's an ordinary record. It lands at `orders-2@4`." },
+      { t: 6000, log: "consumer-2 fails on orders-2@4", text: "consumer-2's handler throws and it retries the same record. Everything after it on `orders-2` waits; the other partitions keep flowing." },
+      { t: 11700, log: "consumer-2: poll timeout expired", text: "It never gets back to `poll()`, so after `max.poll.interval.ms` it leaves the group. It is still retrying." },
+      { t: 12600, log: "consumer-1 is assigned orders-2", text: "The partition moves to consumer-1, from the committed offset, poison included." },
+      { t: 13800, log: "consumer-1 fails on orders-2@4", text: "consumer-1 jams on the same record. Now `orders-0` and `orders-1` stop too." },
+      { t: 19300, log: "consumer-1: poll timeout expired", text: "consumer-1 leaves as well. The group is empty and lag grows on every partition." },
+    ],
+    takeaway: "One bad record can take down a whole group, one consumer at a time. Decide what to do with records you can't process: skip, park, or alert.",
+    tryNext: ["Turn **Dead-letter handling** back on and replay.", "Use **Crash (kill -9)** then **Restart** on a jammed consumer: it rejoins, gets a partition, and can jam again."],
+  },
+  {
+    id: "hot-key",
+    setup: "Three consumers, 70% of records keyed `u1`, a record every 0.25 s, 0.4 s to process one.",
+    moments: [
+      { t: 3300, log: "consumer-2 is assigned orders-1", text: "Each consumer owns one partition. consumer-2 has `orders-1`, where murmur2(u1) % 3 sends every u1 record." },
+      { text: "`orders-1` gets about three records a second; consumer-2 can do 2.5. Its lag rises steadily while consumer-1 and consumer-3 wait on empty fetches." },
+    ],
+    takeaway: "Keys buy per-key order at the price of per-key load. A hot key makes a hot partition, and only one consumer in a group can read it.",
+    tryNext: ["Turn off **Partition by key**: the load spreads, and the producer card shows u1 going everywhere (and out of order).", "**Start** consumer-4: it gets nothing to do."],
+  },
+];

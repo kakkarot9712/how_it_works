@@ -5,7 +5,7 @@
 //
 //   node .claude/skills/verify-simulation/shot.mjs <url> <out.png> [options]
 //     --size=1280x800     viewport (default 1280x800)
-//     --click=<selector>  click an element first (e.g. '[aria-haspopup=listbox]')
+//     --click=<selector>  click an element first (e.g. '[aria-haspopup=listbox]'); several in order: 'a;;b;;c'
 //     --keys=A,B          then press keys (ArrowDown, Enter, Escape, ...)
 //     --hover=<selector>  then move the mouse over an element (tooltips), scrolling it into view
 //     --full              capture the whole page height
@@ -59,9 +59,10 @@ try {
   await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: w < 600 });
   await send("Page.navigate", { url });
   await sleep(Number(opt.wait ?? 4000));
-  if (opt.click) {
-    const ok = await evaluate(`(() => { const el = document.querySelector(${JSON.stringify(opt.click)}); el?.click(); return !!el; })()`);
-    if (!ok) console.error(`warning: nothing matched ${opt.click}`);
+  // Several clicks in order: separate selectors with ";;".
+  for (const sel of String(opt.click || "").split(";;").filter(Boolean)) {
+    const ok = await evaluate(`(() => { const el = document.querySelector(${JSON.stringify(sel)}); el?.click(); return !!el; })()`);
+    if (!ok) console.error(`warning: nothing matched ${sel}`);
     await sleep(400);
   }
   for (const key of String(opt.keys ?? "").split(",").filter(Boolean)) {

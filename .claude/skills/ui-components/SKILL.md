@@ -129,7 +129,24 @@ Writing the content: see the `write-explainer` skill.
 
 ## site/: chrome and catalog
 
-`Logo`, `SiteHeader` (site pages), `SimNav` (simulator + write-up pages), `SimCard`, `SimGrid` (a topic's sims as cards).
+`Logo`, `SiteHeader` (site pages), `SimNav` (simulator + write-up pages), `SimCard`, `SimGrid` (a topic's sims as cards), `PathCard` (a learning path as a card).
+
+## path/: learning paths
+
+Import from `@/components/path`. How to write a path or step: the `add-path-step` skill.
+
+| Component | Use |
+| --- | --- |
+| `PathNav` | Top bar of a step page: logo, path / step breadcrumb, `n/N` with ‹ › links. |
+| `PathOutline` | The path's modules and steps as a rail beside a step; current step marked, finished ones ✓. Client. |
+| `ModuleList` | A path's modules with numbered step cards (kind, minutes, done). The path home's list. Client. |
+| `PathStart` | Start / continue / review button, steps-done count, reset. Client. |
+| `StepFooter` | Previous card and one "✓ Done · next" card that marks progress and moves on (finishes the path on the last step). Client. |
+| `StepKindTag` | Explore / Trace / Lab tag with its meaning in a tooltip. |
+| `SystemMapDiagram` | Clickable SVG map of the whole system from a `SystemMapSpec` (uses `Boundary`); ✓ on finished steps. Client. |
+| `Trace` (`TraceSpec`) | Trace step format: sequence diagram (`TraceDiagram`), state in the actor boxes (changed values lit), hop rows in a ~6-hop scrolling window, current hop's explanation and a "Changed" line. Fits one screen. ← → when focused. Client. |
+| `Predict` (`Prediction`) | Lab card: question, options (one right), explanation after answering, deep link into the simulator. Client. |
+| `useProgress(path)` | Finished steps in localStorage, live across components and tabs. |
 
 ## player/: the simulator shell
 

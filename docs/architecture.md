@@ -77,6 +77,10 @@ The **Player** (`src/player/`) is shared and fills its parent's height. `Player.
 - A live sim must be registered in `src/sims/registry.tsx` (client, `next/dynamic` with `ssr: false`, one chunk per sim) and in `src/sims/explainers.tsx` (`writeups`).
 - `cacheComponents` is on: the `dynamicParams` segment config is not allowed, and pages read `params` inside `<Suspense>` (instant-navigation rule). Because that streams a 200 before `notFound()` runs, `src/proxy.ts` checks the catalog first and returns a real 404 for unknown topic/sim paths. Update the proxy if you add new route shapes.
 
+## Learning paths
+
+`src/paths/catalog.ts` lists paths → modules → steps (metadata, server-safe, like `src/catalog.ts`); `src/paths/content.tsx` maps each path to its source pool, system map and step modules (`src/paths/<path>/steps/<slug>.tsx`, each exporting `Body`, `sources`, and `trace` or `predictions`). Routes: `/learn` and `/learn/[path]` in `(site)`; `/learn/[path]/[step]` in `(path)`, which renders `PathNav` instead of the site header. A step picks its own references from the path's pool with `pickSources(pool, ids)`, so its `[n]` numbering starts at 1; `References scope="page"` closes the page. Labs don't embed the player: each `Predict` card deep-links into the simulator (`?s=&t=`). Progress is per browser (`useProgress`, localStorage). `src/paths/paths.test.ts` enforces sourcing per step, trace structure, and that every prediction opens a real scenario inside its duration. Details: the `add-path-step` skill.
+
 ## Components
 
 UI is built from shared kits in `src/components/` (details and conventions in the `ui-components` skill):
@@ -85,7 +89,8 @@ UI is built from shared kits in `src/components/` (details and conventions in th
 - `canvas/`: SVG building blocks for sim diagrams: NodeBox, Packet, Bar, Boundary, Wire, `rows()`; the flow spotlight (`FocusProvider`, `useFocus`); packet lane sizes (`packetWidth`, `PACKET_LANE`, `LANE_MARGIN`). Each sim's `canvas/layout.ts` exports `LANE_GAP`, checked by `lanes.test.ts`.
 - `inspector/`: InspectorHeader, InspectorEmpty, ConfigLine.
 - `writeup/`: everything on `/how-it-works`, including `Cite`/`citer` and `References` (source-facts skill).
-- `site/`: Logo, SiteHeader, SimNav, SimCard, SimGrid.
+- `site/`: Logo, SiteHeader, SimNav, SimCard, SimGrid, PathCard.
+- `path/`: learning-path shell and step formats (`Trace`, `Predict`, `SystemMapDiagram`, `useProgress`…).
 
 A sim keeps its own UI in `canvas/` (one file per node type), `inspector/` (one panel per node type) and `writeup/`, plus `theme.ts` for its traffic colours and status helpers.
 

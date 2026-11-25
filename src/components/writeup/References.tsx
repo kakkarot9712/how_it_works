@@ -1,15 +1,20 @@
 import { Heading } from "@/components/ui";
 import type { SourceSet } from "@/lib/sources";
 
-/** The end-of-page "References" section: version modelled, then the numbered sources cited above. */
-export function References({ id = "references", title, sources }: { id?: string; title: string; sources: SourceSet }) {
+/**
+ * The end-of-page "References" section: version modelled, then the numbered sources cited above.
+ * `scope="page"` for pages that are not a simulator's write-up (a learning-path step).
+ */
+export function References({ id = "references", title, sources, scope = "simulator" }: { id?: string; title: string; sources: SourceSet; scope?: "simulator" | "page" }) {
   return (
     <section id={id} className="mt-12 scroll-mt-20 border-t border-line pt-10">
       <Heading level="section">{title}</Heading>
       <p className="mt-3 text-base leading-prose text-fg-muted">
-        Modelled on <strong className="text-fg">{sources.subject} {sources.version}</strong>. {sources.versionNote} Sources
-        last checked {sources.checked}. Every claim on this page and in the simulator comes from the sources below; anything
-        the simulation simplifies is listed under &ldquo;What this simulation simplifies&rdquo;.
+        {scope === "page" ? "Written for" : "Modelled on"} <strong className="text-fg">{sources.subject} {sources.version}</strong>. {sources.versionNote}{" "}
+        Sources last checked {sources.checked}.{" "}
+        {scope === "page"
+          ? "Every claim on this page comes from the sources below; anything the page simplifies is listed in its \u201csimplifies\u201d box."
+          : "Every claim on this page and in the simulator comes from the sources below; anything the simulation simplifies is listed under \u201cWhat this simulation simplifies\u201d."}
       </p>
       <ol className="mt-6 space-y-1 text-note leading-snug text-fg-muted">
         {sources.references.map((r, i) => (

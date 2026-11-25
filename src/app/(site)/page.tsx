@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { topics } from "@/catalog";
-import { SimGrid } from "@/components/site";
+import { paths } from "@/paths/catalog";
+import { PathCard, SimGrid } from "@/components/site";
 import { Container, Eyebrow, Heading, LinkButton } from "@/components/ui";
 
 export default function Home() {
@@ -12,18 +13,33 @@ export default function Home() {
           See how systems actually work. Then break them.
         </Heading>
         <p className="mt-4 max-w-2xl text-base leading-relaxed text-fg-muted">
-          Animated simulations of real system internals: message brokers, load balancers, replication.
-          Stall a consumer, cut a network link, crash a node, or pull a component out entirely. Then watch, step by step,
-          what the system does and why.
+          Learning paths that take one system apart, idea by idea: explore a mechanism, trace a request hop by hop, then
+          predict what a failure does and break it in a simulator to check. Stall a consumer, cut a link, crash a node, or
+          pull a component out entirely, and see what the system does and why.
         </p>
-        <div className="mt-8 flex gap-3">
-          <LinkButton href="/redis/pub-sub" size="lg">
-            Start with Redis Pub/Sub →
+        <div className="mt-8 flex flex-wrap gap-3">
+          <LinkButton href="/learn/kafka" size="lg">
+            Start the Kafka path →
+          </LinkButton>
+          <LinkButton href="#topics" size="lg" tone="ghost">
+            Browse simulators ↓
           </LinkButton>
         </div>
       </section>
 
-      <section id="topics" className="space-y-12">
+      <section id="paths" className="mb-16 scroll-mt-20">
+        <Heading level="section" className="mb-4">
+          Learning paths
+        </Heading>
+        <div className="grid gap-3 md:grid-cols-2">
+          {paths.map((p) => (
+            <PathCard key={p.slug} path={p} />
+          ))}
+        </div>
+      </section>
+
+      <section id="topics" className="scroll-mt-20 space-y-12">
+        <Heading level="section">Simulators</Heading>
         {topics.map((t) => (
           <div key={t.slug}>
             <div className="mb-4 flex items-baseline gap-3">

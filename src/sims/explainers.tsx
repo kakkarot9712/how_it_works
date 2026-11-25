@@ -12,6 +12,10 @@ import { Explainer as KafkaReplication, meta as kafkaReplicationMeta } from "./k
 import { scenarios as kafkaReplicationScenarios } from "./kafka-replication/scenarios";
 import { walkthroughs as kafkaReplicationWalkthroughs } from "./kafka-replication/walkthroughs";
 import { sources as kafkaReplicationSources } from "./kafka-replication/sources";
+import { Explainer as KafkaConsumerGroups, meta as kafkaConsumerGroupsMeta } from "./kafka-consumer-groups/writeup/Explainer";
+import { scenarios as kafkaConsumerGroupsScenarios } from "./kafka-consumer-groups/scenarios";
+import { walkthroughs as kafkaConsumerGroupsWalkthroughs } from "./kafka-consumer-groups/walkthroughs";
+import { sources as kafkaConsumerGroupsSources } from "./kafka-consumer-groups/sources";
 import { Explainer as LbAlgorithms, meta as lbAlgorithmsMeta } from "./lb-algorithms/writeup/Explainer";
 import { scenarios as lbAlgorithmsScenarios } from "./lb-algorithms/scenarios";
 import { walkthroughs as lbAlgorithmsWalkthroughs } from "./lb-algorithms/walkthroughs";
@@ -65,6 +69,13 @@ export const writeups: Record<string, Writeup> = {
     scenarios: kafkaReplicationScenarios,
     walkthroughs: kafkaReplicationWalkthroughs,
     sources: kafkaReplicationSources,
+  },
+  "kafka/consumer-groups": {
+    ...kafkaConsumerGroupsMeta,
+    Explainer: KafkaConsumerGroups,
+    scenarios: kafkaConsumerGroupsScenarios,
+    walkthroughs: kafkaConsumerGroupsWalkthroughs,
+    sources: kafkaConsumerGroupsSources,
   },
   "load-balancing/algorithms": {
     ...lbAlgorithmsMeta,
